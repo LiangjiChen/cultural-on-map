@@ -112,7 +112,7 @@ export const collections: Record<CollectionId, Collection> = {
     libraryName: '宋词三百',
     heroKicker: 'NORTHERN SONG · 960—1127',
     heroTitle: '把宋词，读回',
-    heroEmphasis: '汴水山河',
+    heroEmphasis: '锦绣山河',
     heroIntro: '北宋二十四路，三百首词心坐标。循着地图，重逢汴京的灯、西湖的雨与塞下的秋。',
     statLabel: '首宋词',
     regionStatLabel: '路山河',
