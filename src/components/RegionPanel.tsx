@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { ArrowRight, ArrowUpRight, BookOpen, Flame, MapPin, X } from 'lucide-react'
 import type { Poem, Region } from '../types'
 
@@ -10,11 +11,24 @@ interface RegionPanelProps {
 }
 
 export function RegionPanel({ region, poems, onClose, onOpenPoem, onMore }: RegionPanelProps) {
+  const panelRef = useRef<HTMLElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+  const previousRegionId = useRef(region?.id)
+
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: 0 })
+    if (!region || previousRegionId.current === region.id) return
+    previousRegionId.current = region.id
+    if (window.matchMedia('(max-width: 780px)').matches) {
+      panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [region])
+
   if (!region) return null
   const topPoems = [...poems].sort((a, b) => b.heat - a.heat).slice(0, 5)
 
   return (
-    <aside className="region-panel" aria-label={`${region.name}热度诗选`}>
+    <aside className="region-panel" aria-label={`${region.name}热度诗选`} ref={panelRef}>
       <div className="region-panel-head">
         <button className="round-icon panel-close" onClick={onClose} aria-label="关闭区域诗选"><X size={18} /></button>
         <div className="eyebrow"><span /> 地域诗选</div>
@@ -33,7 +47,7 @@ export function RegionPanel({ region, poems, onClose, onOpenPoem, onMore }: Regi
         <small>TOP {Math.min(5, poems.length)}</small>
       </div>
 
-      <div className="region-poem-list">
+      <div className="region-poem-list" ref={listRef}>
         {topPoems.map((poem, index) => (
           <article className="region-poem-card" key={poem.id}>
             <div className={`poem-rank${index === 0 ? ' first' : ''}`}>{String(index + 1).padStart(2, '0')}</div>

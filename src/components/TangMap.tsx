@@ -134,6 +134,8 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
                   tabIndex={0}
                   aria-label={`${region.name}，${count}首诗，点击查看热度诗选`}
                   onClick={() => onSelect(region.id)}
+                  onFocus={() => setHoveredId(region.id)}
+                  onBlur={() => setHoveredId(null)}
                   onKeyDown={event => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault()
@@ -142,11 +144,19 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
                   }}
                 >
                   <circle className="marker-ripple" r={radius + 7} />
-                  {showLabels && <text className="marker-region-name" y={-radius - 15}>{region.name}</text>}
+                  {showLabels && hoveredId !== region.id && <text className="marker-region-name" y={-radius - 15}>{region.name}</text>}
                   <circle className="marker-core" r={radius} filter="url(#marker-shadow)" />
                   <circle className="marker-inner-ring" r={radius - 4} />
                   <text className="marker-count" y="1">{count}</text>
                   <text className="marker-unit" y="13">首</text>
+                  {hoveredId === region.id && (
+                    <g className="marker-tip" transform={`translate(0 ${-radius - 24})`} pointerEvents="none">
+                      <rect x="-70" y="-46" width="140" height="40" rx="4" />
+                      <path d="M-5 -6 L0 0 L5 -6 Z" />
+                      <text className="tip-title" y="-29">{region.name} · {count}首</text>
+                      <text className="tip-sub" y="-15">点击查看热度前五</text>
+                    </g>
+                  )}
                 </g>
               )
             })}

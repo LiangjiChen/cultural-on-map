@@ -217,8 +217,18 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .mountain-layer text { font-family: var(--serif); fill: #998d73; font-size: 8px; letter-spacing: 2px; }
 .sea-labels text { font-family: var(--serif); fill: #94a29a; opacity: .55; font-size: 13px; letter-spacing: 5px; }
 .region-marker { cursor: pointer; outline: none; }
-.marker-ripple { fill: rgba(155,65,48,.08); stroke: rgba(155,65,48,.22); stroke-width: 1; transition: fill .2s, transform .2s; }
+.marker-ripple { fill: rgba(155,65,48,.08); stroke: rgba(155,65,48,.22); stroke-width: 1; transition: fill .2s, transform .2s; transform-origin: center; }
 .region-marker:hover .marker-ripple, .region-marker.selected .marker-ripple { fill: rgba(155,65,48,.16); stroke: rgba(155,65,48,.45); }
+.region-marker.selected .marker-ripple { animation: marker-pulse 1.3s ease-out 2; }
+@keyframes marker-pulse {
+  0% { transform: scale(1); opacity: .9; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+.region-marker:focus-visible .marker-core { stroke: #fff; stroke-width: 3; }
+.marker-tip rect { fill: #35483e; }
+.marker-tip path { fill: #35483e; }
+.tip-title { fill: #f6edd9; font-family: var(--serif); font-size: 11px; letter-spacing: 1px; text-anchor: middle; }
+.tip-sub { fill: #c3bda9; font-size: 8px; letter-spacing: .5px; text-anchor: middle; }
 .marker-core { fill: #a24d3c; stroke: #f4dfbf; stroke-width: 1.5; transition: fill .2s; }
 .region-marker:hover .marker-core { fill: #b45c45; }
 .region-marker.selected .marker-core { fill: #79372f; }
