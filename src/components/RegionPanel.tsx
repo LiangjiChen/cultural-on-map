@@ -5,12 +5,14 @@ import type { Poem, Region } from '../types'
 interface RegionPanelProps {
   region: Region | null
   poems: Poem[]
+  unit: string
+  noun: string
   onClose: () => void
   onOpenPoem: (poem: Poem) => void
   onMore: () => void
 }
 
-export function RegionPanel({ region, poems, onClose, onOpenPoem, onMore }: RegionPanelProps) {
+export function RegionPanel({ region, poems, unit, noun, onClose, onOpenPoem, onMore }: RegionPanelProps) {
   const panelRef = useRef<HTMLElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const previousRegionId = useRef(region?.id)
@@ -28,10 +30,10 @@ export function RegionPanel({ region, poems, onClose, onOpenPoem, onMore }: Regi
   const topPoems = [...poems].sort((a, b) => b.heat - a.heat).slice(0, 5)
 
   return (
-    <aside className="region-panel" aria-label={`${region.name}热度诗选`} ref={panelRef}>
+    <aside className="region-panel" aria-label={`${region.name}热度${noun}选`} ref={panelRef}>
       <div className="region-panel-head">
-        <button className="round-icon panel-close" onClick={onClose} aria-label="关闭区域诗选"><X size={18} /></button>
-        <div className="eyebrow"><span /> 地域诗选</div>
+        <button className="round-icon panel-close" onClick={onClose} aria-label={`关闭区域${noun}选`}><X size={18} /></button>
+        <div className="eyebrow"><span /> 地域{noun}选</div>
         <div className="region-title-row">
           <div>
             <h2>{region.name}</h2>
@@ -43,7 +45,7 @@ export function RegionPanel({ region, poems, onClose, onOpenPoem, onMore }: Regi
       </div>
 
       <div className="top-poems-heading">
-        <span><Flame size={15} /> 本道热度前五</span>
+        <span><Flame size={15} /> 本{unit}热度前五</span>
         <small>TOP {Math.min(5, poems.length)}</small>
       </div>
 
@@ -57,7 +59,7 @@ export function RegionPanel({ region, poems, onClose, onOpenPoem, onMore }: Regi
                 <span className="poem-author">{poem.author}</span>
               </div>
               <p className="poem-summary">{poem.summary}</p>
-              <button className="read-poem-link" onClick={() => onOpenPoem(poem)}>读全诗 <ArrowRight size={12} /></button>
+              <button className="read-poem-link" onClick={() => onOpenPoem(poem)}>读全{noun} <ArrowRight size={12} /></button>
             </div>
           </article>
         ))}
@@ -68,8 +70,10 @@ export function RegionPanel({ region, poems, onClose, onOpenPoem, onMore }: Regi
           <button className="more-poems-button" onClick={onMore}>
             <BookOpen size={16} /> 查看全部 {poems.length} 首 <ArrowRight size={15} />
           </button>
+        ) : poems.length > 0 ? (
+          <p>本{unit}收录 {poems.length} 首，已全部展示</p>
         ) : (
-          <p>本道收录 {poems.length} 首，已全部展示</p>
+          <p>本{unit}暂无收录，可切换其他行政区浏览。</p>
         )}
       </div>
     </aside>

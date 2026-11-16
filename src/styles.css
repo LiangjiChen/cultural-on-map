@@ -556,6 +556,34 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 }
 
 /* 阅读字号提升 */
+.collection-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 18px;
+  border: 1px solid #d8c9ae;
+  border-radius: 999px;
+  background: rgba(250, 246, 236, .7);
+}
+.collection-switch button {
+  padding: 6px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #8a7257;
+  font-family: var(--serif);
+  font-size: 14px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background .2s, color .2s, box-shadow .2s;
+}
+.collection-switch button:hover { color: #6f4a37; }
+.collection-switch button.active {
+  background: #9a4636;
+  color: #fff6e6;
+  box-shadow: 0 3px 10px rgba(122, 55, 43, .2);
+}
 .main-nav button { font-size: 16px; }
 .global-search input { font-size: 14px; }
 .search-results-title { font-size: 13px; }

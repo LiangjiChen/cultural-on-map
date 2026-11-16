@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, MapPin, Search, SearchX, X } from 'lucide-react'
-import { regionById, regions } from '../data/regions'
 import type { Poem, Region } from '../types'
 
 interface PoemLibraryProps {
   initialRegion: Region | null
   poems: Poem[]
+  regions: Region[]
+  regionById: Record<string, Region>
+  dynasty: string
+  noun: string
+  libraryName: string
+  subtitle: string
+  searchPlaceholder: string
+  allRegions: string
   onClose: () => void
   onOpenPoem: (poem: Poem) => void
 }
@@ -21,7 +28,7 @@ function paginationItems(current: number, total: number): (number | string)[] {
   return items
 }
 
-export function PoemLibrary({ initialRegion, poems, onClose, onOpenPoem }: PoemLibraryProps) {
+export function PoemLibrary({ initialRegion, poems, regions, regionById, dynasty, noun, libraryName, subtitle, searchPlaceholder, allRegions, onClose, onOpenPoem }: PoemLibraryProps) {
   const [query, setQuery] = useState('')
   const [filterRegionId, setFilterRegionId] = useState(initialRegion?.id ?? 'all')
   const [pageSize, setPageSize] = useState(10)
@@ -53,10 +60,10 @@ export function PoemLibrary({ initialRegion, poems, onClose, onOpenPoem }: PoemL
         <header className="library-header">
           <div>
             <div className="eyebrow"><span /> POETRY COLLECTION</div>
-            <h2 id="library-title">{initialRegion ? `${initialRegion.name} · 全部诗作` : '唐诗三百首'}</h2>
-            <p>{initialRegion ? initialRegion.capital : '三百首诗，六十九位诗人，十五道山河。'}</p>
+            <h2 id="library-title">{initialRegion ? `${initialRegion.name} · 全部${noun}作` : libraryName}</h2>
+            <p>{initialRegion ? initialRegion.capital : subtitle}</p>
           </div>
-          <button className="round-icon modal-close" onClick={onClose} aria-label="关闭诗词列表"><X size={20} /></button>
+          <button className="round-icon modal-close" onClick={onClose} aria-label={`关闭${noun}作列表`}><X size={20} /></button>
         </header>
 
         <div className="library-toolbar">
@@ -65,14 +72,14 @@ export function PoemLibrary({ initialRegion, poems, onClose, onOpenPoem }: PoemL
             <input
               value={query}
               onChange={event => { setQuery(event.target.value); setPage(1) }}
-              placeholder="在当前范围搜索诗名、作者或诗句"
+              placeholder={searchPlaceholder}
             />
             {query && <button onClick={() => { setQuery(''); setPage(1) }} aria-label="清空搜索"><X size={14} /></button>}
           </label>
           <label className="library-region-select">
             <MapPin size={15} />
             <select value={filterRegionId} onChange={event => { setFilterRegionId(event.target.value); setPage(1) }}>
-              <option value="all">全部十五道</option>
+              <option value="all">{allRegions}</option>
               {regions.map(region => <option key={region.id} value={region.id}>{region.name}</option>)}
             </select>
           </label>
@@ -87,7 +94,7 @@ export function PoemLibrary({ initialRegion, poems, onClose, onOpenPoem }: PoemL
 
         <div className="library-result-meta">
           <span>共找到 <strong>{filteredPoems.length}</strong> 首</span>
-          {filterRegionId !== 'all' && <span className="sort-note">按诗意热度排序</span>}
+          {filterRegionId !== 'all' && <span className="sort-note">按热度排序</span>}
         </div>
 
         <div className="library-list">
@@ -97,7 +104,7 @@ export function PoemLibrary({ initialRegion, poems, onClose, onOpenPoem }: PoemL
               <div className="library-poem-main">
                 <div className="library-poem-title-line">
                   <button onClick={() => onOpenPoem(poem)}>{poem.title}</button>
-                  <span>唐 · {poem.author}</span>
+                  <span>{dynasty} · {poem.author}</span>
                   <i>{poem.type}</i>
                 </div>
                 <p>{poem.content.slice(0, 2).join(' ')}</p>
@@ -109,9 +116,9 @@ export function PoemLibrary({ initialRegion, poems, onClose, onOpenPoem }: PoemL
           {filteredPoems.length === 0 && (
             <div className="empty-search">
               <SearchX size={36} />
-              <h3>未寻得相关诗作</h3>
-              <p>换一个诗名、作者或行政区划试试。</p>
-              <button onClick={() => { setQuery(''); setFilterRegionId('all'); setPage(1) }}>查看全部诗作</button>
+              <h3>未寻得相关{noun}作</h3>
+              <p>换一个{noun}名、作者或行政区划试试。</p>
+              <button onClick={() => { setQuery(''); setFilterRegionId('all'); setPage(1) }}>查看全部{noun}作</button>
             </div>
           )}
         </div>

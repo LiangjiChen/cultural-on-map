@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
 import { BookOpen, Check, Copy, Feather, MapPin, X } from 'lucide-react'
-import { regionById } from '../data/regions'
-import type { Poem } from '../types'
+import type { Poem, Region } from '../types'
 
 interface PoemModalProps {
   poem: Poem
+  region: Region
+  dynasty: string
+  noun: string
   onClose: () => void
 }
 
-export function PoemModal({ poem, onClose }: PoemModalProps) {
+export function PoemModal({ poem, region, dynasty, noun, onClose }: PoemModalProps) {
   const [copied, setCopied] = useState(false)
-  const region = regionById[poem.regionId]
 
   useEffect(() => {
     if (!copied) return
@@ -20,7 +21,7 @@ export function PoemModal({ poem, onClose }: PoemModalProps) {
 
   const copyPoem = async () => {
     try {
-      await navigator.clipboard.writeText(`《${poem.title}》\n唐 · ${poem.author}\n\n${poem.content.join('\n')}`)
+      await navigator.clipboard.writeText(`《${poem.title}》\n${dynasty} · ${poem.author}\n\n${poem.content.join('\n')}`)
       setCopied(true)
     } catch {
       setCopied(false)
@@ -31,12 +32,12 @@ export function PoemModal({ poem, onClose }: PoemModalProps) {
     <div className="modal-backdrop poem-detail-backdrop" onMouseDown={event => event.target === event.currentTarget && onClose()}>
       <section className="poem-detail-modal" role="dialog" aria-modal="true" aria-labelledby="poem-detail-title">
         <button className="round-icon modal-close" onClick={onClose} aria-label="关闭诗词详情"><X size={20} /></button>
-        <div className="poem-detail-seal">唐诗</div>
+        <div className="poem-detail-seal">{dynasty}{noun}</div>
         <div className="poem-detail-scroll">
           <header className="poem-detail-header">
             <div className="eyebrow centered"><span /> 诗行山河 <span /></div>
             <h2 id="poem-detail-title">{poem.title}</h2>
-            <p className="detail-author"><span>唐</span>{poem.author}</p>
+            <p className="detail-author"><span>{dynasty}</span>{poem.author}</p>
             <div className="detail-tags">
               <span>{poem.type}</span>
               <span>{region.name}</span>
@@ -51,7 +52,7 @@ export function PoemModal({ poem, onClose }: PoemModalProps) {
           <div className="ornament-divider"><span /><Feather size={16} /><span /></div>
 
           <section className="explanation-section">
-            <h3><BookOpen size={17} />诗意浅解</h3>
+            <h3><BookOpen size={17} />{noun}意浅解</h3>
             <p>{poem.explanation}</p>
           </section>
           <section className="geo-note-section">
@@ -61,9 +62,9 @@ export function PoemModal({ poem, onClose }: PoemModalProps) {
           </section>
         </div>
         <footer className="poem-detail-footer">
-          <span>诗有其境，境有其诗。</span>
+          <span>{noun}有其境，境有其{noun}。</span>
           <button className={copied ? 'copy-button copied' : 'copy-button'} onClick={copyPoem}>
-            {copied ? <Check size={15} /> : <Copy size={15} />}{copied ? '已复制' : '复制诗文'}
+            {copied ? <Check size={15} /> : <Copy size={15} />}{copied ? '已复制' : `复制${noun}文`}
           </button>
         </footer>
       </section>
