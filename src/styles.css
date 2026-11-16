@@ -556,97 +556,97 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 }
 
 /* 阅读字号提升 */
-.main-nav button { font-size: 15px; }
-.global-search input { font-size: 13px; }
-.search-results-title { font-size: 12px; }
-.search-result-item strong { font-size: 16px; }
-.search-result-item small { font-size: 12px; }
-.search-result-item i { font-size: 11px; }
-.search-all-button, .no-search-result { font-size: 12px; }
-.hero-kicker { font-size: 11px; }
-.hero-copy > p { font-size: 16px; }
-.hero-stats span { font-size: 12px; }
-.region-index-head h2 { font-size: 17px; }
-.region-index-head > span { font-size: 10px; }
-.region-index-intro { font-size: 12px; }
+.main-nav button { font-size: 16px; }
+.global-search input { font-size: 14px; }
+.search-results-title { font-size: 13px; }
+.search-result-item strong { font-size: 17px; }
+.search-result-item small { font-size: 13px; }
+.search-result-item i { font-size: 12px; }
+.search-all-button, .no-search-result { font-size: 13px; }
+.hero-kicker { font-size: 12px; }
+.hero-copy > p { font-size: 17px; }
+.hero-stats span { font-size: 13px; }
+.region-index-head h2 { font-size: 18px; }
+.region-index-head > span { font-size: 11px; }
+.region-index-intro { font-size: 13px; }
 .region-index-item { min-height: 44px; }
-.index-region-info strong { font-size: 13px; }
-.index-region-info small { font-size: 9.5px; }
-.index-count { font-size: 15px; }
-.index-count small { font-size: 9px; }
-.index-footnote { font-size: 10.5px; }
-.map-title h2 { font-size: 18px; }
-.map-title p { font-size: 11.5px; }
-.map-header-actions button { font-size: 11.5px; }
-.live-badge { font-size: 11px; }
-.map-tool { font-size: 11px; }
-.zoom-value { font-size: 10px; }
-.map-legend { font-size: 10px; }
-.map-era-mark { font-size: 10px; }
-.map-card-footer { font-size: 10px; }
-.map-selection-hint { font-size: 11px; }
-.region-description { font-size: 12.5px; }
-.region-title-row p { font-size: 11.5px; }
-.region-total span { font-size: 10px; }
-.top-poems-heading > span { font-size: 12px; }
-.top-poems-heading small { font-size: 9px; }
-.poem-title-link { font-size: 15.5px; }
-.poem-author { font-size: 10.5px; }
-.poem-summary { font-size: 12px; line-height: 1.7; }
-.read-poem-link { font-size: 10.5px; }
-.region-panel-footer p { font-size: 11px; }
-.more-poems-button { font-size: 12.5px; }
-.quote-content > span, .quote-meta span { font-size: 10px; }
-.quote-meta strong { font-size: 13px; }
-.quote-content blockquote { font-size: 21px; }
-.poetry-quote-strip > button { font-size: 11.5px; }
-.site-footer { font-size: 10.5px; }
-.poem-detail-header h2 { font-size: 36px; }
-.detail-author { font-size: 15px; }
-.detail-tags > span { font-size: 10.5px; }
-.poem-full-text p { font-size: 21px; }
-.explanation-section h3 { font-size: 15px; }
-.explanation-section p { font-size: 14.5px; }
-.geo-note-section h3 { font-size: 13px; }
-.geo-note-section p { font-size: 12.5px; }
-.geo-note-section small { font-size: 10.5px; }
-.poem-detail-footer > span, .copy-button { font-size: 11px; }
-.library-header p { font-size: 12.5px; }
-.library-search input { font-size: 13px; }
+.index-region-info strong { font-size: 14px; }
+.index-region-info small { font-size: 10.5px; }
+.index-count { font-size: 16px; }
+.index-count small { font-size: 10px; }
+.index-footnote { font-size: 11.5px; }
+.map-title h2 { font-size: 19px; }
+.map-title p { font-size: 12.5px; }
+.map-header-actions button { font-size: 12.5px; }
+.live-badge { font-size: 12px; }
+.map-tool { font-size: 12px; }
+.zoom-value { font-size: 11px; }
+.map-legend { font-size: 11px; }
+.map-era-mark { font-size: 11px; }
+.map-card-footer { font-size: 11px; }
+.map-selection-hint { font-size: 12px; }
+.region-description { font-size: 13.5px; }
+.region-title-row p { font-size: 12.5px; }
+.region-total span { font-size: 11px; }
+.top-poems-heading > span { font-size: 13px; }
+.top-poems-heading small { font-size: 10px; }
+.poem-title-link { font-size: 17px; }
+.poem-author { font-size: 12px; }
+.poem-summary { font-size: 13.5px; line-height: 1.7; }
+.read-poem-link { font-size: 12px; }
+.region-panel-footer p { font-size: 12px; }
+.more-poems-button { font-size: 13.5px; }
+.quote-content > span, .quote-meta span { font-size: 11px; }
+.quote-meta strong { font-size: 14px; }
+.quote-content blockquote { font-size: 22px; }
+.poetry-quote-strip > button { font-size: 12.5px; }
+.site-footer { font-size: 11.5px; }
+.poem-detail-header h2 { font-size: 38px; }
+.detail-author { font-size: 16px; }
+.detail-tags > span { font-size: 11.5px; }
+.poem-full-text p { font-size: 23px; }
+.explanation-section h3 { font-size: 16px; }
+.explanation-section p { font-size: 16px; }
+.geo-note-section h3 { font-size: 14px; }
+.geo-note-section p { font-size: 13.5px; }
+.geo-note-section small { font-size: 11.5px; }
+.poem-detail-footer > span, .copy-button { font-size: 12px; }
+.library-header p { font-size: 13.5px; }
+.library-search input { font-size: 14px; }
 .library-region-select, .library-region-select select,
-.page-size-select, .page-size-select select { font-size: 12px; }
-.library-result-meta { font-size: 10.5px; }
-.library-poem-row { min-height: 106px; }
-.library-poem-number { font-size: 13px; }
-.library-poem-title-line > button { font-size: 17px; }
-.library-poem-title-line > span { font-size: 12px; }
-.library-poem-title-line > i { font-size: 10px; }
-.library-poem-main > p { font-size: 12.5px; }
-.library-poem-location { font-size: 10.5px; }
-.library-footer > span { font-size: 10.5px; }
-.pagination button { font-size: 11.5px; }
-.empty-search p { font-size: 12.5px; }
-.empty-search button { font-size: 11.5px; }
-.about-modal > p { font-size: 13.5px; }
-.about-features strong { font-size: 14px; }
-.about-features span { font-size: 12.5px; }
-.about-note { font-size: 11.5px; }
-.about-modal > a { font-size: 11.5px; }
+.page-size-select, .page-size-select select { font-size: 13px; }
+.library-result-meta { font-size: 11.5px; }
+.library-poem-row { min-height: 116px; }
+.library-poem-number { font-size: 14px; }
+.library-poem-title-line > button { font-size: 18.5px; }
+.library-poem-title-line > span { font-size: 13px; }
+.library-poem-title-line > i { font-size: 11px; }
+.library-poem-main > p { font-size: 13.5px; }
+.library-poem-location { font-size: 11.5px; }
+.library-footer > span { font-size: 11.5px; }
+.pagination button { font-size: 12.5px; }
+.empty-search p { font-size: 13.5px; }
+.empty-search button { font-size: 12.5px; }
+.about-modal > p { font-size: 14.5px; }
+.about-features strong { font-size: 15px; }
+.about-features span { font-size: 13.5px; }
+.about-note { font-size: 12.5px; }
+.about-modal > a { font-size: 12.5px; }
 
 @media (max-width: 780px) {
-  .global-search input { font-size: 12px; }
-  .hero-copy > p { font-size: 14px; }
-  .map-title p { font-size: 9px; }
-  .map-header-actions button { font-size: 10px; }
-  .map-legend { font-size: 9px; }
-  .region-index-item { min-height: 42px; }
-  .quote-content blockquote { font-size: 16px; }
-  .poem-detail-header h2 { font-size: 31px; }
-  .poem-full-text p { font-size: 18px; }
-  .explanation-section p { font-size: 13.5px; }
-  .library-poem-row { min-height: 98px; }
-  .library-poem-title-line > button { font-size: 16px; }
-  .library-poem-main > p { font-size: 11.5px; }
+  .global-search input { font-size: 13px; }
+  .hero-copy > p { font-size: 15px; }
+  .map-title p { font-size: 10px; }
+  .map-header-actions button { font-size: 11px; }
+  .map-legend { font-size: 10px; }
+  .region-index-item { min-height: 44px; }
+  .quote-content blockquote { font-size: 17px; }
+  .poem-detail-header h2 { font-size: 32px; }
+  .poem-full-text p { font-size: 20px; }
+  .explanation-section p { font-size: 14.5px; }
+  .library-poem-row { min-height: 104px; }
+  .library-poem-title-line > button { font-size: 17px; }
+  .library-poem-main > p { font-size: 12.5px; }
 }
 
 @media (max-width: 420px) {
