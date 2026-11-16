@@ -72,10 +72,6 @@ export default function App() {
 
   const anyModalOpen = libraryOpen || Boolean(detailPoem) || aboutOpen
   useEffect(() => {
-    document.title = `地图上的${collection.label} · 诗行山河`
-  }, [collection.label])
-
-  useEffect(() => {
     if (!anyModalOpen) return
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -98,9 +94,9 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="诗行山河首页">
+        <a className="brand" href="#top" aria-label="诗词山河首页">
           <span className="brand-seal">诗</span>
-          <span className="brand-name"><strong>诗行山河</strong><small>地图上的{collection.label}</small></span>
+          <span className="brand-name"><strong>诗词山河</strong><small>地图上的诗词</small></span>
         </a>
         <nav className="main-nav" aria-label="主导航">
           <button className="active" onClick={() => { setLibraryOpen(false); setAboutOpen(false); document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth' }) }}><Map size={16} />{collection.navMap}</button>
@@ -227,7 +223,7 @@ export default function App() {
       </main>
 
       <footer className="site-footer">
-        <div className="footer-brand"><span className="brand-seal small">诗</span><span>诗行山河 · 让每一首{noun}回到它的山水之间</span></div>
+        <div className="footer-brand"><span className="brand-seal small">诗</span><span>诗词山河 · 让每一首{noun}回到它的山水之间</span></div>
         <p>{collection.footerSource}</p>
       </footer>
 

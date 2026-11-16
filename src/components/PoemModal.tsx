@@ -35,7 +35,7 @@ export function PoemModal({ poem, region, dynasty, noun, onClose }: PoemModalPro
         <div className="poem-detail-seal">{dynasty}{noun}</div>
         <div className="poem-detail-scroll">
           <header className="poem-detail-header">
-            <div className="eyebrow centered"><span /> 诗行山河 <span /></div>
+            <div className="eyebrow centered"><span /> 诗词山河 <span /></div>
             <h2 id="poem-detail-title">{poem.title}</h2>
             <p className="detail-author"><span>{dynasty}</span>{poem.author}</p>
             <div className="detail-tags">
