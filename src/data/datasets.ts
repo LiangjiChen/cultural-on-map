@@ -62,7 +62,7 @@ export const collections: Record<CollectionId, Collection> = {
     libraryName: '唐诗三百',
     heroKicker: 'TANG DYNASTY · 618—907',
     heroTitle: '把唐诗，读回',
-    heroEmphasis: '盛唐山河',
+    heroEmphasis: '万里山河',
     heroIntro: '盛唐十五道，三百首诗意坐标。循着地图，重逢长安的月、江南的雨与塞外的风。',
     statLabel: '首唐诗',
     regionStatLabel: '道山河',
