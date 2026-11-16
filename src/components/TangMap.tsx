@@ -95,6 +95,16 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
             })}
           </g>
 
+          <g className="admin-boundary-layer" aria-hidden="true">
+            {regions.map(region => (
+              <path
+                key={region.id}
+                d={region.path}
+                className={selectedRegionId === region.id ? 'selected' : undefined}
+              />
+            ))}
+          </g>
+
           <g className="river-layer" aria-hidden="true">
             <path className="yellow-river" d="M165 285 C260 275 302 325 380 315 C454 305 466 270 525 285 C578 299 573 354 630 363 C690 373 741 330 807 350 C846 361 858 381 879 376" />
             <path className="yangtze-river" d="M305 515 C370 487 411 500 466 487 C520 474 540 501 594 493 C647 486 672 474 718 492 C761 508 806 521 856 549" />
@@ -171,6 +181,7 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
       </svg>
 
       <div className="map-legend">
+        <span><i className="legend-boundary" />十五道边界</span>
         <span><i className="legend-dot large" />诗作较多</span>
         <span><i className="legend-dot small" />诗作较少</span>
         <span className="legend-note">圆点大小表示收录数量</span>
