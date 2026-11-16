@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Minus, Plus, RotateCcw, Tags } from 'lucide-react'
 import { songRegions as regions } from '../data/songRegions'
 
@@ -12,7 +12,19 @@ export function SongMap({ counts, selectedRegionId, onSelect }: SongMapProps) {
   const [zoom, setZoom] = useState(1)
   const [showLabels, setShowLabels] = useState(true)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const maxCount = useMemo(() => Math.max(1, ...Object.values(counts)), [counts])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const center = () => {
+      if (el.scrollWidth > el.clientWidth) el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+    }
+    const frame = window.requestAnimationFrame(center)
+    const timer = window.setTimeout(center, 180)
+    return () => { window.cancelAnimationFrame(frame); window.clearTimeout(timer) }
+  }, [])
 
   const changeZoom = (amount: number) => {
     setZoom(value => Math.min(1.75, Math.max(0.8, Number((value + amount).toFixed(2)))))
@@ -37,7 +49,8 @@ export function SongMap({ counts, selectedRegionId, onSelect }: SongMapProps) {
         <button className="map-tool icon-only" onClick={resetMap} aria-label="重置地图"><RotateCcw size={15} /></button>
       </div>
 
-      <svg viewBox="0 0 1100 780" className="map-svg" role="img" aria-label="北宋元丰年间二十四路行政区划示意地图">
+      <div className="map-scroll" ref={scrollRef}>
+        <svg viewBox="0 0 1100 780" className="map-svg" role="img" aria-label="北宋元丰年间二十四路行政区划示意地图">
         <defs>
           <linearGradient id="land-wash" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#e8ddc4" />
@@ -155,6 +168,7 @@ export function SongMap({ counts, selectedRegionId, onSelect }: SongMapProps) {
                     }
                   }}
                 >
+                  <circle className="marker-hit" r={Math.max(radius + 16, 36)} />
                   <circle className="marker-ripple" r={radius + 7} />
                   {showLabels && hoveredId !== region.id && <text className="marker-region-name" y={-radius - 15}>{region.name}</text>}
                   <circle className="marker-core" r={radius} filter="url(#song-marker-shadow)" />
@@ -181,6 +195,7 @@ export function SongMap({ counts, selectedRegionId, onSelect }: SongMapProps) {
           <circle cy="4" r="15" />
         </g>
       </svg>
+      </div>
 
       <div className="map-legend">
         <span><i className="legend-boundary" />二十四路边界</span>

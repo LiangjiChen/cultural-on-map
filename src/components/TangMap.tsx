@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Minus, Plus, RotateCcw, Tags } from 'lucide-react'
 import { regions } from '../data/regions'
 
@@ -12,7 +12,19 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
   const [zoom, setZoom] = useState(1)
   const [showLabels, setShowLabels] = useState(true)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const maxCount = useMemo(() => Math.max(...Object.values(counts)), [counts])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const center = () => {
+      if (el.scrollWidth > el.clientWidth) el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+    }
+    const frame = window.requestAnimationFrame(center)
+    const timer = window.setTimeout(center, 180)
+    return () => { window.cancelAnimationFrame(frame); window.clearTimeout(timer) }
+  }, [])
 
   const changeZoom = (amount: number) => {
     setZoom(value => Math.min(1.75, Math.max(0.8, Number((value + amount).toFixed(2)))))
@@ -37,7 +49,8 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
         <button className="map-tool icon-only" onClick={resetMap} aria-label="重置地图"><RotateCcw size={15} /></button>
       </div>
 
-      <svg viewBox="0 0 1100 780" className="map-svg" role="img" aria-label="唐朝开元年间十五道行政区划示意地图">
+      <div className="map-scroll" ref={scrollRef}>
+        <svg viewBox="0 0 1100 780" className="map-svg" role="img" aria-label="唐朝开元年间十五道行政区划示意地图">
         <defs>
           <filter id="paper-grain">
             <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed="8" result="noise" />
@@ -153,6 +166,7 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
                     }
                   }}
                 >
+                  <circle className="marker-hit" r={Math.max(radius + 16, 36)} />
                   <circle className="marker-ripple" r={radius + 7} />
                   {showLabels && hoveredId !== region.id && <text className="marker-region-name" y={-radius - 15}>{region.name}</text>}
                   <circle className="marker-core" r={radius} filter="url(#marker-shadow)" />
@@ -179,6 +193,7 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
           <circle cy="4" r="15" />
         </g>
       </svg>
+      </div>
 
       <div className="map-legend">
         <span><i className="legend-boundary" />十五道边界</span>

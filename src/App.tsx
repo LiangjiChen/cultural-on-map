@@ -208,7 +208,7 @@ export default function App() {
                 onMore={() => openLibrary(selectedRegionId)}
               />
               {!selectedRegion && (
-                <div className="map-selection-hint"><MapPin size={15} />点击朱砂圆点，寻访一方{noun}意</div>
+                <div className="map-selection-hint"><MapPin size={15} />点击朱砂圆点，寻访一方{noun}意<em>左右滑动</em></div>
               )}
             </div>
             <footer className="map-card-footer">

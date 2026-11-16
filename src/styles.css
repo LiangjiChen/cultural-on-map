@@ -198,6 +198,7 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .map-stage { position: relative; flex: 1; min-height: 650px; overflow: hidden; background: #eee8d9; }
 .tang-map { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(circle at 47% 44%, #f4eedf 0, #ede5d3 62%, #e7deca 100%); }
 .tang-map::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 80px rgba(106,86,48,.07); }
+.map-scroll { position: absolute; inset: 0; }
 .map-svg { display: block; width: 100%; height: 100%; }
 .map-coordinate-lines path { fill: none; stroke: #9f9a85; stroke-width: .5; stroke-dasharray: 2 9; opacity: .15; }
 .zoom-layer { transition: transform .28s ease; }
@@ -243,6 +244,7 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .region-marker:hover .marker-core { fill: #b45c45; }
 .region-marker.selected .marker-core { fill: #79372f; }
 .marker-inner-ring { fill: none; stroke: rgba(255,243,216,.38); stroke-width: .7; pointer-events: none; }
+.marker-hit { fill: rgba(0,0,0,0); pointer-events: all; }
 .marker-count { fill: #fff7e7; font-family: Georgia, serif; font-size: 15px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
 .marker-unit { fill: rgba(255,247,231,.8); font-family: var(--serif); font-size: 7px; text-anchor: middle; pointer-events: none; }
 .marker-region-name { fill: #3e4c42; stroke: rgba(239,231,212,.95); stroke-width: 3px; paint-order: stroke; font-family: var(--serif); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-anchor: middle; pointer-events: none; }
@@ -680,4 +682,67 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 @media (max-width: 420px) {
   .poem-detail-footer > span { font-size: 9.5px; }
   .map-legend { font-size: 9px; }
+}
+
+/* 手机端交互与安全区优化 */
+@media (max-width: 780px) {
+  .site-header { padding-top: calc(12px + env(safe-area-inset-top)); }
+  .main-nav button { font-size: 13px; gap: 4px; white-space: nowrap; }
+  .main-nav button svg { width: 14px; height: 14px; }
+  .collection-switch { margin-bottom: 14px; }
+  .collection-switch button { padding: 8px 24px; font-size: 15px; }
+  .hero-section { padding-top: 28px; }
+  .hero-kicker { font-size: 10px; letter-spacing: 1.6px; }
+  .hero-copy > p { font-size: 14px; line-height: 1.85; }
+  .hero-stats { gap: 20px; padding-top: 15px; }
+  .hero-stats strong { font-size: 27px; }
+  .hero-stats span { font-size: 12px; }
+
+  .map-card-header { min-height: 64px; height: auto; padding: 9px 12px; gap: 8px; }
+  .map-title h2 { font-size: 16px; }
+  .map-title p { font-size: 10px; line-height: 1.5; }
+  .map-header-actions button { padding: 8px 10px; }
+
+  .tang-map { height: 470px; }
+  .map-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .map-scroll::-webkit-scrollbar { display: none; }
+  .map-svg { width: 100%; min-width: 663px; height: 470px; }
+  .map-tools { top: 8px; left: 8px; height: 38px; }
+  .map-tool { height: 30px; padding: 0 8px; }
+  .map-tool.icon-only { min-width: 32px; justify-content: center; }
+  .map-legend { left: 10px; bottom: 10px; padding: 7px 10px; }
+  .map-selection-hint { position: static; left: auto; bottom: auto; transform: none; justify-content: center; margin: 0 12px 10px; padding: 9px 12px; }
+  .map-selection-hint em { display: inline; padding-left: 8px; margin-left: 2px; border-left: 1px solid #d8c7ae; color: #a58f78; font-style: normal; }
+  .marker-region-name { font-size: 15px; letter-spacing: 1px; }
+  .marker-count { font-size: 17px; }
+  .marker-unit { font-size: 9px; }
+
+  .region-panel-head { padding: 20px 20px 16px; }
+  .region-poem-list { padding: 0 16px 4px; }
+  .region-index { padding: 15px 12px; }
+  .region-index-list { gap: 3px 8px; }
+  .region-index-item { grid-template-columns: 18px minmax(0,1fr) 30px; }
+  .index-region-info strong { font-size: 13px; letter-spacing: 0; }
+  .index-region-info small { font-size: 10px; }
+  .index-count { font-size: 15px; }
+
+  .poetry-quote-strip { padding: 18px; }
+  .modal-close { top: calc(18px + env(safe-area-inset-top)); right: 16px; }
+  .poem-detail-seal { top: calc(23px + env(safe-area-inset-top)); }
+  .library-header { padding-top: calc(22px + env(safe-area-inset-top)); }
+  .library-toolbar { padding: 12px 16px 10px; }
+  .library-region-select select, .page-size-select select { min-width: 0; }
+  .library-footer { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .poem-detail-scroll { padding-top: calc(40px + env(safe-area-inset-top)); padding-left: 20px; padding-right: 20px; }
+  .poem-detail-header h2 { overflow-wrap: anywhere; }
+  .poem-detail-footer { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
+
+@media (max-width: 420px) {
+  .main-nav button { font-size: 12px; letter-spacing: 0; }
+  .hero-stats { gap: 14px; }
+  .hero-stats > div { min-width: 58px; }
+  .index-region-info small { display: none; }
+  .poem-detail-header h2 { font-size: 28px; }
+  .poem-full-text p { font-size: 19px; letter-spacing: 1px; }
 }
