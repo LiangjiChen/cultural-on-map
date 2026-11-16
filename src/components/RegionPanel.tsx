@@ -7,24 +7,25 @@ interface RegionPanelProps {
   poems: Poem[]
   unit: string
   noun: string
+  scrollSignal: number
   onClose: () => void
   onOpenPoem: (poem: Poem) => void
   onMore: () => void
 }
 
-export function RegionPanel({ region, poems, unit, noun, onClose, onOpenPoem, onMore }: RegionPanelProps) {
+export function RegionPanel({ region, poems, unit, noun, scrollSignal, onClose, onOpenPoem, onMore }: RegionPanelProps) {
   const panelRef = useRef<HTMLElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
-  const previousRegionId = useRef(region?.id)
+  const handledScroll = useRef(scrollSignal)
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: 0 })
-    if (!region || previousRegionId.current === region.id) return
-    previousRegionId.current = region.id
+    if (!region || scrollSignal === handledScroll.current) return
+    handledScroll.current = scrollSignal
     if (window.matchMedia('(max-width: 780px)').matches) {
       panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
-  }, [region])
+  }, [region, scrollSignal])
 
   if (!region) return null
   const topPoems = [...poems].sort((a, b) => b.heat - a.heat).slice(0, 5)

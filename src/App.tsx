@@ -26,6 +26,7 @@ export default function App() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [globalQuery, setGlobalQuery] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
+  const [scrollSignal, setScrollSignal] = useState(0)
 
   const collection = collections[collectionId]
   const { poems, regions, regionById, dynasty, noun, unit } = collection
@@ -52,6 +53,10 @@ export default function App() {
 
   const quotePoem = poems.find(poem => poem.id === collection.quote.poemId) ?? poems[0]
   const openPoem = (poem: Poem) => setDetailPoemId(poem.id)
+  const selectRegion = (regionId: string) => {
+    setSelectedRegionId(regionId)
+    setScrollSignal(value => value + 1)
+  }
   const openLibrary = (regionId: string | null = null) => {
     setLibraryRegionId(regionId)
     setLibraryOpen(true)
@@ -162,7 +167,7 @@ export default function App() {
                 <button
                   key={region.id}
                   className={selectedRegionId === region.id ? 'region-index-item selected' : 'region-index-item'}
-                  onClick={() => setSelectedRegionId(region.id)}
+                  onClick={() => selectRegion(region.id)}
                 >
                   <span className="index-number">{String(index + 1).padStart(2, '0')}</span>
                   <span className="index-region-info">
@@ -190,15 +195,16 @@ export default function App() {
             </header>
             <div className="map-stage">
               {collectionId === 'tang' ? (
-                <TangMap counts={counts} selectedRegionId={selectedRegionId} onSelect={setSelectedRegionId} />
+                <TangMap counts={counts} selectedRegionId={selectedRegionId} onSelect={selectRegion} />
               ) : (
-                <SongMap counts={counts} selectedRegionId={selectedRegionId} onSelect={setSelectedRegionId} />
+                <SongMap counts={counts} selectedRegionId={selectedRegionId} onSelect={selectRegion} />
               )}
               <RegionPanel
                 region={selectedRegion}
                 poems={selectedPoems}
                 unit={unit}
                 noun={noun}
+                scrollSignal={scrollSignal}
                 onClose={() => setSelectedRegionId(null)}
                 onOpenPoem={openPoem}
                 onMore={() => openLibrary(selectedRegionId)}
