@@ -202,17 +202,17 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .map-svg { display: block; width: 100%; height: 100%; }
 .map-coordinate-lines path { fill: none; stroke: #9f9a85; stroke-width: .5; stroke-dasharray: 2 9; opacity: .15; }
 .zoom-layer { transition: transform .28s ease; }
-.outer-territory path { fill: #ded6c2; stroke: #a99c82; stroke-width: 1.2; stroke-dasharray: 5 4; opacity: .75; }
+.outer-territory path { fill: #ded6c2; stroke: #a99c82; stroke-width: 1.2; stroke-dasharray: 5 4; opacity: .75; fill-rule: evenodd; }
 .outer-territory-labels text { font-family: var(--serif); font-size: 12px; fill: #91856f; letter-spacing: 2px; text-anchor: middle; }
 .outer-territory-labels .outer-territory-sub { font-size: 9px; opacity: .7; }
-.region-shape { fill: url(#land-wash); stroke: none; cursor: pointer; transition: fill .18s, opacity .18s; }
+.region-shape { fill: url(#land-wash); stroke: none; cursor: pointer; transition: fill .18s, opacity .18s; fill-rule: evenodd; }
 .region-shape:hover, .region-shape.hovered { fill: #e4cfab; }
 .region-shape.selected { fill: #dec0a0; }
 .admin-boundary-layer { pointer-events: none; }
 .admin-boundary-layer path {
   fill: none;
   stroke: #8f7b5b;
-  stroke-width: 1.65;
+  stroke-width: 1.25;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
   opacity: .85;
@@ -247,8 +247,11 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .marker-hit { fill: rgba(0,0,0,0); pointer-events: all; }
 .marker-count { fill: #fff7e7; font-family: Georgia, serif; font-size: 15px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
 .marker-unit { fill: rgba(255,247,231,.8); font-family: var(--serif); font-size: 7px; text-anchor: middle; pointer-events: none; }
-.marker-region-name { fill: #3e4c42; stroke: rgba(239,231,212,.95); stroke-width: 3px; paint-order: stroke; font-family: var(--serif); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-anchor: middle; pointer-events: none; }
-.region-marker.selected .marker-region-name { fill: #7d342b; }
+.marker-label-layer { pointer-events: none; }
+.marker-label-leader { stroke: #8f7b5b; stroke-width: .8; stroke-dasharray: 2 2; opacity: .65; vector-effect: non-scaling-stroke; }
+.marker-region-name { fill: #3e4c42; stroke: rgba(239,231,212,.95); stroke-width: 3px; paint-order: stroke; font-family: var(--serif); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+.marker-label.selected .marker-region-name { fill: #7d342b; }
+.marker-label.selected .marker-label-leader { stroke: #9a4636; opacity: .85; }
 .map-compass text { text-anchor: middle; font-family: var(--serif); font-size: 12px; fill: #7e7765; }
 .map-compass path { fill: #9c5642; }
 .map-compass circle { fill: none; stroke: #a79a7e; stroke-width: .7; }

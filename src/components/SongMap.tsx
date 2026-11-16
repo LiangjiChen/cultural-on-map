@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Minus, Plus, RotateCcw, Tags } from 'lucide-react'
 import { songRegions as regions } from '../data/songRegions'
+import { songLabels, songMountains, songOuterRegions, songRiverLabels, songRivers, songSeaLabels } from '../data/mapGeometry'
+import { layoutMapLabels, markerRadius } from './mapLabels'
 
 interface SongMapProps {
   counts: Record<string, number>
@@ -14,6 +16,7 @@ export function SongMap({ counts, selectedRegionId, onSelect }: SongMapProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const maxCount = useMemo(() => Math.max(1, ...Object.values(counts)), [counts])
+  const markerLabels = useMemo(() => layoutMapLabels(regions, counts, maxCount), [counts, maxCount])
 
   useEffect(() => {
     const el = scrollRef.current
@@ -80,14 +83,12 @@ export function SongMap({ counts, selectedRegionId, onSelect }: SongMapProps) {
 
         <g transform={`translate(550 390) scale(${zoom}) translate(-550 -390)`} className="zoom-layer">
           <g className="outer-territory" filter="url(#song-paper-grain)">
-            <path d="M34 190 L120 132 L210 145 L286 120 L300 150 L235 430 L250 575 L330 720 L300 755 L190 610 L120 400 Z" />
-            <path d="M300 150 L700 90 L1015 175 L930 330 L810 345 L690 300 L565 265 L435 275 Z" opacity="0.55" />
+            {songOuterRegions.map((territory) => <path key={territory.id} d={territory.path} />)}
           </g>
           <g className="outer-territory-labels" aria-hidden="true">
-            <text x="845" y="78">辽</text>
-            <text x="170" y="205">西 夏</text>
-            <text x="132" y="470">吐 蕃</text>
-            <text x="368" y="750" className="outer-territory-sub">大 理</text>
+            {songLabels.map((label) => (
+              <text key={label.text} x={label.position[0]} y={label.position[1]} className={label.sub ? 'outer-territory-sub' : undefined}>{label.text}</text>
+            ))}
           </g>
 
           <g className="region-layer" filter="url(#song-paper-grain)">
@@ -120,34 +121,40 @@ export function SongMap({ counts, selectedRegionId, onSelect }: SongMapProps) {
           </g>
 
           <g className="river-layer" aria-hidden="true">
-            <path className="yellow-river" d="M300 305 C380 292 430 318 505 312 C585 306 610 286 675 300 C735 312 742 345 805 338 C855 333 880 318 925 300" />
-            <path className="yangtze-river" d="M300 470 C390 452 448 472 512 470 C585 468 620 486 685 480 C750 474 790 458 842 470 C888 481 920 515 955 548" />
-            <path className="river-tributary" d="M512 470 C520 505 540 530 565 552 M685 480 C690 515 706 540 720 565 M805 338 C795 372 790 400 780 430" />
-            <text x="704" y="294" className="river-label">大 河</text>
-            <text x="668" y="466" className="river-label">长 江</text>
+            <path className="yellow-river" d={songRivers.yellow} />
+            <path className="yangtze-river" d={songRivers.yangtze} />
+            {songRiverLabels.map(label => <text key={label.text} x={label.position[0]} y={label.position[1]} className="river-label">{label.text}</text>)}
           </g>
 
           <g className="mountain-layer" aria-hidden="true">
-            <path d="M645 292 l9 -16 l8 11 l8 -16 l12 20 M503 392 l9 -15 l8 11 l7 -14 l12 19 M592 180 l9 -14 l8 10 l8 -15 l11 18 M505 505 l9 -14 l8 10 l8 -15 l11 19 M748 632 l9 -14 l8 10 l8 -15 l11 19" />
-            <text x="640" y="284">太行</text>
-            <text x="498" y="384">秦岭</text>
-            <text x="586" y="172">雁门</text>
-            <text x="500" y="497">巫山</text>
-            <text x="742" y="624">南岭</text>
+            {songMountains.map((mountain) => (
+              <g key={mountain.text} transform={`translate(${mountain.position[0]} ${mountain.position[1]})`}>
+                <path d="M-18 6 L-10 -9 L-3 6 M-7 6 L4 -14 L16 6 M0 6 L8 -7 L20 6" />
+                <text x="0" y="21" textAnchor="middle">{mountain.text}</text>
+              </g>
+            ))}
           </g>
 
           <g className="sea-labels" aria-hidden="true">
-            <text x="952" y="292">渤 海</text>
-            <text x="962" y="520">东 海</text>
-            <text x="790" y="712">南 海</text>
-            <text x="600" y="70">宋 辽 边 界</text>
+            {songSeaLabels.map((label) => <text key={label.text} x={label.position[0]} y={label.position[1]}>{label.text}</text>)}
           </g>
+
+          {showLabels && (
+            <g className="marker-label-layer" aria-hidden="true">
+              {markerLabels.filter(label => label.id !== hoveredId).map(label => (
+                <g key={label.id} className={selectedRegionId === label.id ? 'marker-label selected' : 'marker-label'}>
+                  {label.leader && <line className="marker-label-leader" {...label.leader} />}
+                  <text className="marker-region-name" x={label.x} y={label.y}>{label.name}</text>
+                </g>
+              ))}
+            </g>
+          )}
 
           <g className="marker-layer">
             {regions.map(region => {
               const count = counts[region.id] ?? 0
               if (count === 0) return null
-              const radius = 15 + Math.sqrt(count / maxCount) * 15
+              const radius = markerRadius(count, maxCount)
               const [x, y] = region.center
               const isSelected = selectedRegionId === region.id
               return (
@@ -170,7 +177,6 @@ export function SongMap({ counts, selectedRegionId, onSelect }: SongMapProps) {
                 >
                   <circle className="marker-hit" r={Math.max(radius + 16, 36)} />
                   <circle className="marker-ripple" r={radius + 7} />
-                  {showLabels && hoveredId !== region.id && <text className="marker-region-name" y={-radius - 15}>{region.name}</text>}
                   <circle className="marker-core" r={radius} filter="url(#song-marker-shadow)" />
                   <circle className="marker-inner-ring" r={radius - 4} />
                   <text className="marker-count" y="1">{count}</text>

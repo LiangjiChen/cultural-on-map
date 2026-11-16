@@ -1,6 +1,7 @@
 import type { Region } from '../types'
+import { tangGeometry } from './mapGeometry'
 
-export const regions: Region[] = [
+const regionMetadata: Region[] = [
   {
     id: 'jingji', name: '京畿道', capital: '京兆府 · 长安', modern: '今陕西中部',
     description: '帝都所在，朱雀大街车马如织。终南积雪、曲江春水与大明宫早朝，都在这里化作诗篇。',
@@ -77,5 +78,10 @@ export const regions: Region[] = [
     path: 'M459 625 L535 659 L601 625 L657 667 L715 712 L660 735 L570 716 L492 728 L392 677 Z M675 748 C691 739 705 747 698 757 C690 765 676 761 675 748 Z', center: [565, 687],
   },
 ]
+
+export const regions = regionMetadata.map((region) => ({
+  ...region,
+  ...tangGeometry[region.id],
+}))
 
 export const regionById = Object.fromEntries(regions.map(region => [region.id, region]))

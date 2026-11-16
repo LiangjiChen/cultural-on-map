@@ -1,6 +1,7 @@
 import type { Region } from '../types'
+import { songGeometry } from './mapGeometry'
 
-export const songRegions: Region[] = [
+const regionMetadata: Region[] = [
   {
     id: "qinfeng",
     name: "秦凤路",
@@ -218,3 +219,8 @@ export const songRegions: Region[] = [
     center: [936, 670],
   },
 ]
+
+export const songRegions = regionMetadata.map((region) => ({
+  ...region,
+  ...songGeometry[region.id],
+}))
