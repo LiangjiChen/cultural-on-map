@@ -440,8 +440,7 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .about-features strong { color: #96523d; font-family: var(--serif); font-size: 13px; }
 .about-features span { color: #827b6b; font-size: 11px; line-height: 1.7; }
 .about-note { color: #9b907c; background: #eee5d5; padding: 13px 15px; font-size: 10px; line-height: 1.8; }
-.about-modal > a { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 6px; color: #9b5d45; font-size: 10px; }
-.about-modal > a:hover { color: #75362b; }
+.about-modal > .about-source { margin-top: 20px; text-align: center; color: #8f7f66; font-size: 10px; line-height: 1.8; word-break: break-all; user-select: text; -webkit-user-select: text; }
 
 .header-tools { margin-left: auto; display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
 .header-tools .global-search { margin-left: 0; }
@@ -462,7 +461,7 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 
 .help-modal { width: min(680px, 100%); max-height: calc(100vh - 44px); overflow-y: auto; background: #faf6ec; border: 1px solid #d5c4a8; border-radius: 5px; padding: 38px 44px 34px; position: relative; box-shadow: 0 30px 90px rgba(17,27,22,.3); animation: modal-in .22s ease both; }
 .help-modal h2 { text-align: center; font-family: var(--serif); font-size: 26px; letter-spacing: 3px; margin: 12px 0 16px; }
-.help-hint { width: fit-content; margin: 0 auto 14px; padding: 4px 11px; border: 1px dashed #cab89d; border-radius: 999px; color: #96795c; font-size: 11px; letter-spacing: .5px; }
+.help-hint { width: fit-content; margin: 0 auto 14px; padding: 4px 11px; border: 1px dashed #cab89d; border-radius: 999px; color: #96795c; font-size: 11px; letter-spacing: .5px; text-align: center; }
 .help-close-note { margin-top: 20px; text-align: center; color: #8d6c52; font-size: 11px; letter-spacing: .5px; }
 .help-intro { color: #73766a; font-family: var(--serif); font-size: 12px; line-height: 2.05; text-align: justify; }
 .help-credit { margin-top: 6px; text-align: right; color: #a1947f; font-size: 10px; letter-spacing: .4px; }
@@ -736,7 +735,7 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .about-features strong { font-size: 15px; }
 .about-features span { font-size: 13.5px; }
 .about-note { font-size: 12.5px; }
-.about-modal > a { font-size: 12.5px; }
+.about-modal > .about-source { font-size: 12.5px; }
 .help-button { font-size: 14px; }
 .help-hint { font-size: 12.5px; }
 .help-close-note { font-size: 12.5px; }

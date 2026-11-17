@@ -6,6 +6,7 @@ import { RegionPanel } from './components/RegionPanel'
 import { PoemModal } from './components/PoemModal'
 import { PoemLibrary } from './components/PoemLibrary'
 import { HelpModal } from './components/HelpModal'
+import { AboutModal } from './components/AboutModal'
 import { collections, type CollectionId } from './data/datasets'
 import type { Poem } from './types'
 
@@ -276,22 +277,12 @@ export default function App() {
       )}
 
       {aboutOpen && (
-        <div className="modal-backdrop about-backdrop" onMouseDown={event => event.target === event.currentTarget && setAboutOpen(false)}>
-          <section className="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-title">
-            <button className="round-icon modal-close" onClick={() => setAboutOpen(false)} aria-label="关闭项目介绍"><X size={20} /></button>
-            <span className="about-seal">诗</span>
-            <div className="eyebrow centered"><span /> ABOUT THE PROJECT <span /></div>
-            <h2 id="about-title">让诗歌回到山河之间</h2>
-            <p>{collection.aboutText}</p>
-            <div className="about-features">
-              {collection.aboutFeatures.map(([title, text]) => (
-                <div key={title}><strong>{title}</strong><span>{text}</span></div>
-              ))}
-            </div>
-            <div className="about-note">{collection.aboutNote}</div>
-            <a href="https://github.com/chinese-poetry/chinese-poetry" target="_blank" rel="noreferrer">查看开源诗词文本来源 <ArrowRight size={14} /></a>
-          </section>
-        </div>
+        <AboutModal
+          text={collection.aboutText}
+          features={collection.aboutFeatures}
+          note={collection.aboutNote}
+          onClose={() => setAboutOpen(false)}
+        />
       )}
 
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
