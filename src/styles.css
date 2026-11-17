@@ -203,8 +203,24 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .map-stage { position: relative; flex: 1; min-height: 650px; overflow: hidden; background: #eee8d9; }
 .tang-map { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(circle at 47% 44%, #f4eedf 0, #ede5d3 62%, #e7deca 100%); }
 .tang-map::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 80px rgba(106,86,48,.07); }
-.map-scroll { position: absolute; inset: 0; }
-.map-svg { display: block; width: 100%; height: 100%; }
+.map-scroll { position: absolute; inset: 0; overflow: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.map-scroll::-webkit-scrollbar { display: none; }
+.map-svg { display: block; width: calc(100% * var(--map-zoom, 1)); height: calc(100% * var(--map-zoom, 1)); }
+.map-scroll-hints { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.map-scroll-rail { position: absolute; border-radius: 999px; background: rgba(120,100,70,.14); }
+.map-scroll-rail > span { position: absolute; border-radius: 999px; background: rgba(126,74,46,.62); box-shadow: 0 0 0 1px rgba(253,249,240,.8); }
+.map-scroll-rail.is-vertical { top: 14px; right: 5px; bottom: 14px; width: 5px; }
+.map-scroll-rail.is-vertical > span { left: 0; width: 100%; min-height: 18px; }
+.map-scroll-rail.is-horizontal { left: 14px; right: 14px; bottom: 5px; height: 5px; }
+.map-scroll-rail.is-horizontal > span { top: 0; height: 100%; min-width: 18px; }
+@media (min-width: 1051px) {
+  .map-stage:has(.region-panel) .map-scroll-rail.is-vertical { right: 392px; }
+  .map-stage:has(.region-panel) .map-scroll-rail.is-horizontal { right: 392px; }
+}
+@media (min-width: 1500px) {
+  .map-stage:has(.region-panel) .map-scroll-rail.is-vertical { right: 362px; }
+  .map-stage:has(.region-panel) .map-scroll-rail.is-horizontal { right: 362px; }
+}
 .map-coordinate-lines path { fill: none; stroke: #9f9a85; stroke-width: .5; stroke-dasharray: 2 9; opacity: .15; }
 .zoom-layer { transition: transform .28s ease; }
 .outer-territory path { fill: #ded6c2; stroke: #a99c82; stroke-width: 1.2; stroke-dasharray: 5 4; opacity: .75; fill-rule: evenodd; }
@@ -718,9 +734,9 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
   .map-header-actions .map-style-switch button { padding: 6px 12px; }
 
   .tang-map { height: 470px; }
-  .map-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .map-scroll { overflow: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .map-scroll::-webkit-scrollbar { display: none; }
-  .map-svg { width: 100%; min-width: 663px; height: 470px; }
+  .map-svg { width: calc(663px * var(--map-zoom, 1)); height: calc(470px * var(--map-zoom, 1)); }
   .map-tools { top: 8px; left: 8px; height: 38px; }
   .map-tool { height: 30px; padding: 0 8px; }
   .map-tool.icon-only { min-width: 32px; justify-content: center; }

@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Minus, Plus, RotateCcw, Tags } from 'lucide-react'
 import { classicRegions, regions as realisticRegions } from '../data/regions'
 import { tangLabels, tangMountains, tangOuterRegions, tangRiverLabels, tangRivers, tangSeaLabels } from '../data/mapGeometry'
 import { layoutMapLabels, markerRadius } from './mapLabels'
+import { MapScrollHints } from './MapScrollHints'
 
 interface TangMapProps {
   mapStyle: 'classic' | 'realistic'
@@ -12,21 +14,18 @@ interface TangMapProps {
 }
 
 const REALISTIC_VIEWBOX = { x: 380, y: 45, width: 700, height: 490 }
-const CLASSIC_CENTER = [550, 390] as const
 
 export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMapProps) {
   const [zoom, setZoom] = useState(1)
   const [showLabels, setShowLabels] = useState(true)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const zoomFocusRef = useRef<{ x: number; y: number } | null>(null)
   const isClassic = mapStyle === 'classic'
   const regions = isClassic ? classicRegions : realisticRegions
   const viewBox = isClassic
     ? '0 0 1100 780'
     : `${REALISTIC_VIEWBOX.x} ${REALISTIC_VIEWBOX.y} ${REALISTIC_VIEWBOX.width} ${REALISTIC_VIEWBOX.height}`
-  const zoomCenter = isClassic
-    ? CLASSIC_CENTER
-    : [REALISTIC_VIEWBOX.x + REALISTIC_VIEWBOX.width / 2, REALISTIC_VIEWBOX.y + REALISTIC_VIEWBOX.height / 2] as const
   const compass = isClassic
     ? { x: 1000, y: 92 }
     : { x: REALISTIC_VIEWBOX.x + REALISTIC_VIEWBOX.width - 72, y: REALISTIC_VIEWBOX.y + 47 }
@@ -47,11 +46,28 @@ export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMa
     return () => { window.cancelAnimationFrame(frame); window.clearTimeout(timer) }
   }, [])
 
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    const focus = zoomFocusRef.current
+    if (!el || !focus) return
+    zoomFocusRef.current = null
+    el.scrollLeft = focus.x * el.scrollWidth - el.clientWidth / 2
+    el.scrollTop = focus.y * el.scrollHeight - el.clientHeight / 2
+  }, [zoom])
+
   const changeZoom = (amount: number) => {
+    const el = scrollRef.current
+    if (el) {
+      zoomFocusRef.current = {
+        x: (el.scrollLeft + el.clientWidth / 2) / el.scrollWidth,
+        y: (el.scrollTop + el.clientHeight / 2) / el.scrollHeight,
+      }
+    }
     setZoom(value => Math.min(1.75, Math.max(0.8, Number((value + amount).toFixed(2)))))
   }
 
   const resetMap = () => {
+    zoomFocusRef.current = { x: 0.5, y: 0 }
     setZoom(1)
     setShowLabels(true)
   }
@@ -71,7 +87,13 @@ export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMa
       </div>
 
       <div className="map-scroll" ref={scrollRef}>
-        <svg viewBox={viewBox} className="map-svg" role="img" aria-label="唐朝开元年间十五道行政区划示意地图">
+        <svg
+          viewBox={viewBox}
+          className="map-svg"
+          style={{ '--map-zoom': zoom } as CSSProperties}
+          role="img"
+          aria-label="唐朝开元年间十五道行政区划示意地图"
+        >
         <defs>
           <filter id="paper-grain">
             <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed="8" result="noise" />
@@ -99,7 +121,7 @@ export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMa
           <path d="M180 65 V735 M390 45 V750 M600 40 V755 M810 60 V740 M980 110 V690" />
         </g>
 
-        <g transform={`translate(${zoomCenter[0]} ${zoomCenter[1]}) scale(${zoom}) translate(${-zoomCenter[0]} ${-zoomCenter[1]})`} className="zoom-layer">
+        <g className="zoom-layer">
           {isClassic ? (
             <>
               <g className="outer-territory" filter="url(#paper-grain)">
@@ -262,6 +284,8 @@ export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMa
         </g>
       </svg>
       </div>
+
+      <MapScrollHints targetRef={scrollRef} revision={zoom} />
 
       <div className="map-legend">
         <span><i className="legend-boundary" />十五道边界</span>
