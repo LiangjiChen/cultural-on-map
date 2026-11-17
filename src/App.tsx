@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, BookOpen, Compass, Info, Library, Map, MapPin, Search, X } from 'lucide-react'
+import { ArrowRight, BookOpen, CircleHelp, Compass, Info, Library, Map, MapPin, Search, X } from 'lucide-react'
 import { TangMap } from './components/TangMap'
 import { SongMap } from './components/SongMap'
 import { RegionPanel } from './components/RegionPanel'
 import { PoemModal } from './components/PoemModal'
 import { PoemLibrary } from './components/PoemLibrary'
+import { HelpModal } from './components/HelpModal'
 import { collections, type CollectionId } from './data/datasets'
 import type { Poem } from './types'
 
@@ -25,6 +26,7 @@ export default function App() {
   const [libraryOpen, setLibraryOpen] = useState(false)
   const [libraryRegionId, setLibraryRegionId] = useState<string | null>(null)
   const [aboutOpen, setAboutOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const [globalQuery, setGlobalQuery] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
   const [scrollSignal, setScrollSignal] = useState(0)
@@ -72,11 +74,12 @@ export default function App() {
     setLibraryOpen(false)
     setLibraryRegionId(null)
     setAboutOpen(false)
+    setHelpOpen(false)
     setGlobalQuery('')
     setSearchFocused(false)
   }
 
-  const anyModalOpen = libraryOpen || Boolean(detailPoem) || aboutOpen
+  const anyModalOpen = libraryOpen || Boolean(detailPoem) || aboutOpen || helpOpen
   useEffect(() => {
     if (!anyModalOpen) return
     const previous = document.body.style.overflow
@@ -89,13 +92,14 @@ export default function App() {
       if (event.key !== 'Escape') return
       if (detailPoem) setDetailPoemId(null)
       else if (aboutOpen) setAboutOpen(false)
+      else if (helpOpen) setHelpOpen(false)
       else if (libraryOpen) setLibraryOpen(false)
       else if (globalQuery) { setGlobalQuery(''); setSearchFocused(false) }
       else if (selectedRegionId) setSelectedRegionId(null)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [aboutOpen, detailPoem, globalQuery, libraryOpen, selectedRegionId])
+  }, [aboutOpen, detailPoem, globalQuery, helpOpen, libraryOpen, selectedRegionId])
 
   return (
     <div className="app-shell">
@@ -109,30 +113,35 @@ export default function App() {
           <button onClick={() => openLibrary()}><Library size={16} />{collection.libraryName}</button>
           <button onClick={() => setAboutOpen(true)}><Info size={16} />关于项目</button>
         </nav>
-        <div className="global-search">
-          <Search size={17} />
-          <input
-            value={globalQuery}
-            onChange={event => setGlobalQuery(event.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-            placeholder={collection.searchPlaceholder}
-            aria-label={collection.searchAria}
-          />
-          {globalQuery && <button className="search-clear" onClick={() => setGlobalQuery('')} aria-label="清空搜索"><X size={14} /></button>}
-          {searchFocused && globalQuery && (
-            <div className="search-results" onMouseDown={event => event.preventDefault()}>
-              <div className="search-results-title">检索结果 <span>{globalResults.length ? `前 ${globalResults.length} 首` : '0 首'}</span></div>
-              {globalResults.map(poem => (
-                <button key={poem.id} className="search-result-item" onClick={() => { openPoem(poem); setGlobalQuery(''); setSearchFocused(false) }}>
-                  <span><strong>{poem.title}</strong><small>{dynasty} · {poem.author}</small></span>
-                  <i>{regionById[poem.regionId].name}</i>
-                </button>
-              ))}
-              {globalResults.length === 0 && <p className="no-search-result">未寻得相关{noun}作，试试“苏轼”或“江南”。</p>}
-              <button className="search-all-button" onClick={() => openLibrary()}>进入{noun}集检索 <ArrowRight size={13} /></button>
-            </div>
-          )}
+        <div className="header-tools">
+          <div className="global-search">
+            <Search size={17} />
+            <input
+              value={globalQuery}
+              onChange={event => setGlobalQuery(event.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              placeholder={collection.searchPlaceholder}
+              aria-label={collection.searchAria}
+            />
+            {globalQuery && <button className="search-clear" onClick={() => setGlobalQuery('')} aria-label="清空搜索"><X size={14} /></button>}
+            {searchFocused && globalQuery && (
+              <div className="search-results" onMouseDown={event => event.preventDefault()}>
+                <div className="search-results-title">检索结果 <span>{globalResults.length ? `前 ${globalResults.length} 首` : '0 首'}</span></div>
+                {globalResults.map(poem => (
+                  <button key={poem.id} className="search-result-item" onClick={() => { openPoem(poem); setGlobalQuery(''); setSearchFocused(false) }}>
+                    <span><strong>{poem.title}</strong><small>{dynasty} · {poem.author}</small></span>
+                    <i>{regionById[poem.regionId].name}</i>
+                  </button>
+                ))}
+                {globalResults.length === 0 && <p className="no-search-result">未寻得相关{noun}作，试试“苏轼”或“江南”。</p>}
+                <button className="search-all-button" onClick={() => openLibrary()}>进入{noun}集检索 <ArrowRight size={13} /></button>
+              </div>
+            )}
+          </div>
+          <button className="help-button" onClick={() => setHelpOpen(true)} aria-label="使用帮助">
+            <CircleHelp size={17} /><span>帮助</span>
+          </button>
         </div>
       </header>
 
@@ -284,6 +293,8 @@ export default function App() {
           </section>
         </div>
       )}
+
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
     </div>
   )
 }
