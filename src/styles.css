@@ -125,6 +125,8 @@ button:disabled { cursor: not-allowed; }
   top: calc(100% + 12px);
   right: 0;
   width: 360px;
+  max-height: min(480px, 70vh);
+  overflow-y: auto;
   padding: 10px;
   border: 1px solid #d9ceba;
   background: #fbf8f0;
@@ -458,6 +460,7 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
   transition: border-color .2s, color .2s, background .2s;
 }
 .help-button:hover { color: var(--vermilion); border-color: #b99878; background: #fffdf7; }
+.help-button.brand-help { flex-shrink: 0; }
 
 .help-modal { width: min(680px, 100%); max-height: calc(100vh - 44px); overflow-y: auto; background: #faf6ec; border: 1px solid #d5c4a8; border-radius: 5px; padding: 38px 44px 34px; position: relative; box-shadow: 0 30px 90px rgba(17,27,22,.3); animation: modal-in .22s ease both; }
 .help-modal h2 { text-align: center; font-family: var(--serif); font-size: 26px; letter-spacing: 3px; margin: 12px 0 16px; }
