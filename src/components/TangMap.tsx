@@ -1,22 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Minus, Plus, RotateCcw, Tags } from 'lucide-react'
-import { regions } from '../data/regions'
+import { classicRegions, regions as realisticRegions } from '../data/regions'
 import { tangLabels, tangMountains, tangOuterRegions, tangRiverLabels, tangRivers, tangSeaLabels } from '../data/mapGeometry'
 import { layoutMapLabels, markerRadius } from './mapLabels'
 
 interface TangMapProps {
+  mapStyle: 'classic' | 'realistic'
   counts: Record<string, number>
   selectedRegionId: string | null
   onSelect: (regionId: string) => void
 }
 
-export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
+export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMapProps) {
   const [zoom, setZoom] = useState(1)
   const [showLabels, setShowLabels] = useState(true)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const isClassic = mapStyle === 'classic'
+  const regions = isClassic ? classicRegions : realisticRegions
   const maxCount = useMemo(() => Math.max(1, ...Object.values(counts)), [counts])
-  const markerLabels = useMemo(() => layoutMapLabels(regions, counts, maxCount), [counts, maxCount])
+  const markerLabels = useMemo(
+    () => isClassic ? [] : layoutMapLabels(regions, counts, maxCount),
+    [counts, isClassic, maxCount, regions],
+  )
 
   useEffect(() => {
     const el = scrollRef.current
@@ -82,14 +88,30 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
         </g>
 
         <g transform={`translate(550 390) scale(${zoom}) translate(-550 -390)`} className="zoom-layer">
-          <g className="outer-territory" filter="url(#paper-grain)">
-            {tangOuterRegions.map((territory) => <path key={territory.id} d={territory.path} />)}
-          </g>
-          <g className="outer-territory-labels" aria-hidden="true">
-            {tangLabels.map((label) => (
-              <text key={label.text} x={label.position[0]} y={label.position[1]} className={label.sub ? 'outer-territory-sub' : undefined}>{label.text}</text>
-            ))}
-          </g>
+          {isClassic ? (
+            <>
+              <g className="outer-territory" filter="url(#paper-grain)">
+                <path d="M34 184 L106 142 L183 148 L222 111 L327 88 L410 118 L415 285 L335 378 L190 307 L82 251 L42 240 Z" />
+                <path d="M222 111 L270 51 L370 38 L452 65 L520 93 L410 118 L327 177 L255 222 L175 213 L106 142 L183 148 Z" />
+              </g>
+              <g className="outer-territory-labels" aria-hidden="true">
+                <text x="128" y="192">安西都护府</text>
+                <text x="280" y="102">北庭都护府</text>
+                <text x="115" y="222" className="outer-territory-sub">西域</text>
+              </g>
+            </>
+          ) : (
+            <>
+              <g className="outer-territory" filter="url(#paper-grain)">
+                {tangOuterRegions.map((territory) => <path key={territory.id} d={territory.path} />)}
+              </g>
+              <g className="outer-territory-labels" aria-hidden="true">
+                {tangLabels.map((label) => (
+                  <text key={label.text} x={label.position[0]} y={label.position[1]} className={label.sub ? 'outer-territory-sub' : undefined}>{label.text}</text>
+                ))}
+              </g>
+            </>
+          )}
 
           <g className="region-layer" filter="url(#paper-grain)">
             {regions.map(region => {
@@ -120,26 +142,52 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
             ))}
           </g>
 
-          <g className="river-layer" aria-hidden="true">
-            <path className="yellow-river" d={tangRivers.yellow} />
-            <path className="yangtze-river" d={tangRivers.yangtze} />
-            {tangRiverLabels.map(label => <text key={label.text} x={label.position[0]} y={label.position[1]} className="river-label">{label.text}</text>)}
-          </g>
-
-          <g className="mountain-layer" aria-hidden="true">
-            {tangMountains.map((mountain) => (
-              <g key={mountain.text} transform={`translate(${mountain.position[0]} ${mountain.position[1]})`}>
-                <path d="M-18 6 L-10 -9 L-3 6 M-7 6 L4 -14 L16 6 M0 6 L8 -7 L20 6" />
-                <text x="0" y="21" textAnchor="middle">{mountain.text}</text>
+          {isClassic ? (
+            <>
+              <g className="river-layer" aria-hidden="true">
+                <path className="yellow-river" d="M165 285 C260 275 302 325 380 315 C454 305 466 270 525 285 C578 299 573 354 630 363 C690 373 741 330 807 350 C846 361 858 381 879 376" />
+                <path className="yangtze-river" d="M305 515 C370 487 411 500 466 487 C520 474 540 501 594 493 C647 486 672 474 718 492 C761 508 806 521 856 549" />
+                <path className="river-tributary" d="M489 434 C500 463 487 475 466 487 M618 393 C628 432 652 454 681 479 M742 479 C756 500 760 508 761 508" />
+                <text x="714" y="344" className="river-label">大 河</text>
+                <text x="686" y="483" className="river-label">长 江</text>
               </g>
-            ))}
-          </g>
+              <g className="mountain-layer" aria-hidden="true">
+                <path d="M366 394 l10 -17 l8 12 l9 -19 l13 24 M576 353 l9 -15 l8 11 l7 -14 l12 20 M699 304 l10 -17 l9 13 l8 -14 l12 19 M393 561 l10 -16 l8 11 l8 -16 l12 21 M692 582 l9 -14 l8 10 l8 -15 l11 19" />
+                <text x="361" y="386">终南</text>
+                <text x="576" y="343">太行</text>
+                <text x="690" y="295">燕山</text>
+                <text x="384" y="551">蜀山</text>
+                <text x="684" y="574">南岭</text>
+              </g>
+              <g className="sea-labels" aria-hidden="true">
+                <text x="958" y="350">渤 海</text>
+                <text x="942" y="510">东 海</text>
+                <text x="800" y="718">南 海</text>
+                <text x="513" y="72">漠 北</text>
+              </g>
+            </>
+          ) : (
+            <>
+              <g className="river-layer" aria-hidden="true">
+                <path className="yellow-river" d={tangRivers.yellow} />
+                <path className="yangtze-river" d={tangRivers.yangtze} />
+                {tangRiverLabels.map(label => <text key={label.text} x={label.position[0]} y={label.position[1]} className="river-label">{label.text}</text>)}
+              </g>
+              <g className="mountain-layer" aria-hidden="true">
+                {tangMountains.map((mountain) => (
+                  <g key={mountain.text} transform={`translate(${mountain.position[0]} ${mountain.position[1]})`}>
+                    <path d="M-18 6 L-10 -9 L-3 6 M-7 6 L4 -14 L16 6 M0 6 L8 -7 L20 6" />
+                    <text x="0" y="21" textAnchor="middle">{mountain.text}</text>
+                  </g>
+                ))}
+              </g>
+              <g className="sea-labels" aria-hidden="true">
+                {tangSeaLabels.map((label) => <text key={label.text} x={label.position[0]} y={label.position[1]}>{label.text}</text>)}
+              </g>
+            </>
+          )}
 
-          <g className="sea-labels" aria-hidden="true">
-            {tangSeaLabels.map((label) => <text key={label.text} x={label.position[0]} y={label.position[1]}>{label.text}</text>)}
-          </g>
-
-          {showLabels && (
+          {!isClassic && showLabels && (
             <g className="marker-label-layer" aria-hidden="true">
               {markerLabels.filter(label => label.id !== hoveredId).map(label => (
                 <g key={label.id} className={selectedRegionId === label.id ? 'marker-label selected' : 'marker-label'}>
@@ -153,7 +201,7 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
           <g className="marker-layer">
             {regions.map(region => {
               const count = counts[region.id] ?? 0
-              const radius = markerRadius(count, maxCount)
+              const radius = isClassic ? 15 + Math.sqrt(count / maxCount) * 15 : markerRadius(count, maxCount)
               const [x, y] = region.center
               const isSelected = selectedRegionId === region.id
               return (
@@ -176,6 +224,7 @@ export function TangMap({ counts, selectedRegionId, onSelect }: TangMapProps) {
                 >
                   <circle className="marker-hit" r={Math.max(radius + 16, 36)} />
                   <circle className="marker-ripple" r={radius + 7} />
+                  {isClassic && showLabels && hoveredId !== region.id && <text className="marker-region-name" y={-radius - 15}>{region.name}</text>}
                   <circle className="marker-core" r={radius} filter="url(#marker-shadow)" />
                   <circle className="marker-inner-ring" r={radius - 4} />
                   <text className="marker-count" y="1">{count}</text>

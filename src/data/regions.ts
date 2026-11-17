@@ -79,6 +79,8 @@ const regionMetadata: Region[] = [
   },
 ]
 
+export const classicRegions = regionMetadata
+
 export const regions = regionMetadata.map((region) => ({
   ...region,
   ...tangGeometry[region.id],

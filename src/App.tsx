@@ -19,6 +19,7 @@ const topRegionId = (id: CollectionId) => {
 
 export default function App() {
   const [collectionId, setCollectionId] = useState<CollectionId>('tang')
+  const [mapStyle, setMapStyle] = useState<'classic' | 'realistic'>('classic')
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>('jingji')
   const [detailPoemId, setDetailPoemId] = useState<number | null>(null)
   const [libraryOpen, setLibraryOpen] = useState(false)
@@ -189,15 +190,19 @@ export default function App() {
                 <div><h2>{collection.mapTitle}</h2><p>{collection.mapSubtitle}</p></div>
               </div>
               <div className="map-header-actions">
+                <div className="map-style-switch" role="group" aria-label="切换地图版本">
+                  <button className={mapStyle === 'classic' ? 'active' : ''} aria-pressed={mapStyle === 'classic'} onClick={() => setMapStyle('classic')}>原地图</button>
+                  <button className={mapStyle === 'realistic' ? 'active' : ''} aria-pressed={mapStyle === 'realistic'} onClick={() => setMapStyle('realistic')}>疆域图</button>
+                </div>
                 <span className="live-badge"><i />{collection.mapBadge}</span>
-                <button onClick={() => openLibrary()}><BookOpen size={15} />{collection.mapAllButton}</button>
+                <button className="map-library-button" onClick={() => openLibrary()}><BookOpen size={15} />{collection.mapAllButton}</button>
               </div>
             </header>
             <div className="map-stage">
               {collectionId === 'tang' ? (
-                <TangMap counts={counts} selectedRegionId={selectedRegionId} onSelect={selectRegion} />
+                <TangMap mapStyle={mapStyle} counts={counts} selectedRegionId={selectedRegionId} onSelect={selectRegion} />
               ) : (
-                <SongMap counts={counts} selectedRegionId={selectedRegionId} onSelect={selectRegion} />
+                <SongMap mapStyle={mapStyle} counts={counts} selectedRegionId={selectedRegionId} onSelect={selectRegion} />
               )}
               <RegionPanel
                 region={selectedRegion}

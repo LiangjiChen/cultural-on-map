@@ -220,7 +220,9 @@ const regionMetadata: Region[] = [
   },
 ]
 
+export const classicSongRegions = regionMetadata
+
 export const songRegions = regionMetadata.map((region) => ({
   ...region,
-  ...songGeometry[region.id],
+  ...songGeometry[region.id === 'jingnanbei' ? 'jingxibei' : region.id],
 }))
