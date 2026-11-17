@@ -99,6 +99,7 @@ export function HelpModal({ onClose }: HelpModalProps) {
           诗词山河是一张可以阅读的诗词地图。唐诗三百首归入盛唐十五道，宋词三百首归入北宋二十四路，
           循着行政区划重访每一首作品里的山河与人间。
         </p>
+        <p className="help-credit">By rolandclj with trae on mandalorians home.</p>
 
         <div className="help-steps">
           {steps.map(([title, text], index) => (
