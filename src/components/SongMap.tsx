@@ -233,6 +233,14 @@ export function SongMap({ mapStyle, counts, selectedRegionId, onSelect }: SongMa
             </g>
           )}
 
+          {isClassic && showLabels && (
+            <g className="marker-label-layer" aria-hidden="true">
+              {regions.filter(region => (counts[region.id] ?? 0) === 0).map(region => (
+                <text key={region.id} className="marker-region-name empty-region-name" x={region.center[0]} y={region.center[1]}>{region.name}</text>
+              ))}
+            </g>
+          )}
+
           <g className="marker-layer">
             {regions.map(region => {
               const count = counts[region.id] ?? 0

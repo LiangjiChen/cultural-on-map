@@ -68,6 +68,7 @@ export function layoutMapLabels(
   maxCount: number,
 ): PositionedMapLabel[] {
   const visible = regions.filter(region => (counts[region.id] ?? 0) > 0)
+  const empty = regions.filter(region => (counts[region.id] ?? 0) === 0)
   const markers = visible.map(region => ({
     id: region.id,
     x: region.center[0],
@@ -85,6 +86,25 @@ export function layoutMapLabels(
   )
   const placed: { rect: Rect }[] = []
   const result = new Map<string, PositionedMapLabel>()
+
+  for (const region of empty) {
+    const width = region.name.length * 15 + Math.max(0, region.name.length - 1)
+    const height = 21
+    placed.push({
+      rect: {
+        left: region.center[0] - width / 2,
+        right: region.center[0] + width / 2,
+        top: region.center[1] - height / 2,
+        bottom: region.center[1] + height / 2,
+      },
+    })
+    result.set(region.id, {
+      id: region.id,
+      name: region.name,
+      x: region.center[0],
+      y: region.center[1],
+    })
+  }
 
   for (const region of ordered) {
     const marker = markers.find(item => item.id === region.id)!
@@ -163,5 +183,5 @@ export function layoutMapLabels(
     })
   }
 
-  return visible.map(region => result.get(region.id)).filter((label): label is PositionedMapLabel => Boolean(label))
+  return regions.map(region => result.get(region.id)).filter((label): label is PositionedMapLabel => Boolean(label))
 }
