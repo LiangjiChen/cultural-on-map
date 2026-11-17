@@ -346,6 +346,7 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .poem-detail-seal { position: absolute; left: 28px; top: 30px; z-index: 3; width: 30px; padding: 6px 0; border: 1px solid #a24c3c; color: #a24c3c; font-family: var(--serif); font-size: 12px; line-height: 1.35; text-align: center; }
 .poem-detail-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 45px 64px 30px; scrollbar-width: thin; scrollbar-color: #d0bfa5 transparent; overscroll-behavior: contain; }
 .poem-detail-header { text-align: center; }
+.poem-detail-hint { width: fit-content; margin: 0 auto 14px; padding: 4px 11px; border: 1px dashed #cab89d; border-radius: 999px; color: #96795c; font-size: 11px; letter-spacing: .5px; }
 .poem-detail-header h2 { margin: 20px 0 13px; color: #2f4238; font-family: var(--serif); font-size: 34px; font-weight: 600; line-height: 1.5; letter-spacing: 3px; }
 .detail-author { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; color: #7c7768; font-family: var(--serif); font-size: 14px; letter-spacing: 2px; }
 .detail-author > span { border: 1px solid #b9aa90; color: #9a8064; padding: 1px 4px; font-size: 9px; letter-spacing: 0; }
@@ -643,6 +644,7 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .poem-detail-header h2 { font-size: 38px; }
 .detail-author { font-size: 16px; }
 .detail-tags > span { font-size: 11.5px; }
+.poem-detail-hint { font-size: 12.5px; }
 .poem-full-text p { font-size: 23px; }
 .explanation-section h3 { font-size: 16px; }
 .explanation-section p { font-size: 16px; }

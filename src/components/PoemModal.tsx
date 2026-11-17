@@ -96,6 +96,7 @@ export function PoemModal({ poem, region, dynasty, noun, onClose }: PoemModalPro
         <div className="poem-detail-seal">{dynasty}{noun}</div>
         <div className="poem-detail-scroll">
           <header className="poem-detail-header">
+            <p className="poem-detail-hint">连续点击三下关闭当前诗词页</p>
             <div className="eyebrow centered"><span /> 诗词山河 <span /></div>
             <h2 id="poem-detail-title">{poem.title}</h2>
             <p className="detail-author"><span>{dynasty}</span>{poem.author}</p>
@@ -123,7 +124,7 @@ export function PoemModal({ poem, region, dynasty, noun, onClose }: PoemModalPro
           </section>
         </div>
         <footer className="poem-detail-footer">
-          <span>{noun}有其境，境有其{noun}。<small className="poem-detail-shortcut">连续点击三次关闭 · 手机可左右滑动关闭</small></span>
+          <span>{noun}有其境，境有其{noun}。<small className="poem-detail-shortcut">手机可左右滑动关闭</small></span>
           <button className={copied ? 'copy-button copied' : 'copy-button'} onClick={copyPoem}>
             {copied ? <Check size={15} /> : <Copy size={15} />}{copied ? '已复制' : `复制${noun}文`}
           </button>
