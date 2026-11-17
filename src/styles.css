@@ -49,7 +49,7 @@ button:disabled { cursor: not-allowed; }
   padding: 0 max(32px, calc((100vw - 1540px) / 2));
   display: flex;
   align-items: center;
-  gap: 46px;
+  gap: 24px;
   position: sticky;
   top: 0;
   z-index: 40;
@@ -102,8 +102,7 @@ button:disabled { cursor: not-allowed; }
 .main-nav button:hover, .main-nav button.active { color: var(--vermilion); }
 .main-nav button.active::after { transform: scaleX(1); }
 .global-search {
-  margin-left: auto;
-  width: 260px;
+  width: auto;
   height: 38px;
   display: flex;
   align-items: center;
@@ -444,8 +443,8 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .about-note { color: #9b907c; background: #eee5d5; padding: 13px 15px; font-size: 10px; line-height: 1.8; }
 .about-modal > .about-source { margin-top: 20px; text-align: center; color: #8f7f66; font-size: 10px; line-height: 1.8; word-break: break-all; user-select: text; -webkit-user-select: text; }
 
-.header-tools { margin-left: auto; display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
-.header-tools .global-search { margin-left: 0; }
+.header-tools { margin-left: auto; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; max-width: 680px; }
+.header-tools .global-search { margin-left: 0; width: 100%; flex: 1; min-width: 0; max-width: none; }
 .help-button {
   height: 38px;
   padding: 0 13px;
@@ -460,7 +459,6 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
   transition: border-color .2s, color .2s, background .2s;
 }
 .help-button:hover { color: var(--vermilion); border-color: #b99878; background: #fffdf7; }
-.help-button.brand-help { flex-shrink: 0; }
 
 .help-modal { width: min(680px, 100%); max-height: calc(100vh - 44px); overflow-y: auto; background: #faf6ec; border: 1px solid #d5c4a8; border-radius: 5px; padding: 38px 44px 34px; position: relative; box-shadow: 0 30px 90px rgba(17,27,22,.3); animation: modal-in .22s ease both; }
 .help-modal h2 { text-align: center; font-family: var(--serif); font-size: 26px; letter-spacing: 3px; margin: 12px 0 16px; }
@@ -491,10 +489,10 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 }
 
 @media (max-width: 1260px) {
-  .site-header { gap: 24px; }
+  .site-header { gap: 18px; }
+  .header-tools { max-width: 520px; }
   .main-nav button { padding: 0 11px; }
   .main-nav button::after { left: 11px; right: 11px; }
-  .global-search { width: 225px; }
   main { padding: 0 22px; }
   .hero-stats { gap: 20px; padding-right: 8px; }
   .explore-layout { grid-template-columns: 210px minmax(0,1fr); gap: 15px; }
@@ -506,10 +504,10 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 }
 
 @media (max-width: 1050px) {
-  .site-header { padding: 0 20px; gap: 18px; }
+  .site-header { padding: 0 20px; gap: 12px; }
   .brand-name small { display: none; }
   .brand-name strong { font-size: 17px; letter-spacing: 2px; }
-  .global-search { width: 210px; }
+  .header-tools { max-width: 440px; }
   .main-nav { gap: 0; }
   .main-nav button { font-size: 12px; }
   .hero-section { padding: 35px 4px 28px; }
@@ -532,10 +530,11 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 
 @media (max-width: 780px) {
   .site-header { height: auto; min-height: 106px; flex-wrap: wrap; gap: 0; padding: 12px 16px 0; }
-  .brand { height: 40px; }
+  .brand { height: 40px; flex-shrink: 0; }
   .brand-seal { width: 36px; height: 36px; font-size: 21px; }
   .brand-name strong { font-size: 16px; }
-  .global-search { height: 36px; width: 150px; }
+  .header-tools { flex: 1 1 auto; min-width: 0; max-width: none; justify-content: flex-end; }
+  .global-search { height: 36px; flex: 1 1 auto; min-width: 0; max-width: none; }
   .help-button { width: 36px; height: 36px; padding: 0; justify-content: center; }
   .help-button span { display: none; }
   .search-results { width: min(360px, calc(100vw - 32px)); right: 0; }
@@ -614,7 +613,8 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 }
 
 @media (max-width: 420px) {
-  .global-search { width: 126px; }
+  .header-tools { gap: 6px; }
+  .help-button { width: 34px; height: 34px; padding: 0; }
   .global-search input { font-size: 10px; }
   .brand-name strong { font-size: 14px; }
   .hero-stats { gap: 18px; }

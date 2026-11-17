@@ -109,9 +109,6 @@ export default function App() {
           <span className="brand-seal">诗</span>
           <span className="brand-name"><strong>诗词山河</strong><small>地图上的诗词</small></span>
         </a>
-        <button className="help-button brand-help" onClick={() => setHelpOpen(true)} aria-label="使用帮助">
-          <CircleHelp size={17} /><span>帮助</span>
-        </button>
         <nav className="main-nav" aria-label="主导航">
           <button className="active" onClick={() => { setLibraryOpen(false); setAboutOpen(false); document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth' }) }}><Map size={16} />{collection.navMap}</button>
           <button onClick={() => openLibrary()}><Library size={16} />{collection.libraryName}</button>
@@ -143,6 +140,9 @@ export default function App() {
               </div>
             )}
           </div>
+          <button className="help-button" onClick={() => setHelpOpen(true)} aria-label="使用帮助">
+            <CircleHelp size={17} /><span>帮助</span>
+          </button>
         </div>
       </header>
 
