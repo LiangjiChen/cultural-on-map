@@ -90,19 +90,20 @@ export function layoutMapLabels(
   for (const region of empty) {
     const width = region.name.length * 15 + Math.max(0, region.name.length - 1)
     const height = 21
+    const y = region.center[1] - 15
     placed.push({
       rect: {
         left: region.center[0] - width / 2,
         right: region.center[0] + width / 2,
-        top: region.center[1] - height / 2,
-        bottom: region.center[1] + height / 2,
+        top: y - height / 2,
+        bottom: y + height / 2,
       },
     })
     result.set(region.id, {
       id: region.id,
       name: region.name,
       x: region.center[0],
-      y: region.center[1],
+      y,
     })
   }
 

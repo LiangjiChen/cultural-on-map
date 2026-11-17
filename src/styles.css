@@ -273,6 +273,8 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .marker-region-name { fill: #3e4c42; stroke: rgba(239,231,212,.95); stroke-width: 3px; paint-order: stroke; font-family: var(--serif); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
 .marker-label.selected .marker-region-name { fill: #7d342b; }
 .empty-region-name { fill: #75674f; font-weight: 500; letter-spacing: 1px; opacity: .85; }
+.marker-core-zero { fill: #a06a52; stroke: #f2e3c9; stroke-width: .8; opacity: .75; }
+.marker-zero { fill: #75674f; font-family: Georgia, serif; font-size: 10px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
 .marker-label.selected .marker-label-leader { stroke: #9a4636; opacity: .85; }
 .map-compass text { text-anchor: middle; font-family: var(--serif); font-size: 12px; fill: #7e7765; }
 .map-compass path { fill: #9c5642; }

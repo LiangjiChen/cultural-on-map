@@ -236,7 +236,7 @@ export function SongMap({ mapStyle, counts, selectedRegionId, onSelect }: SongMa
           {isClassic && showLabels && (
             <g className="marker-label-layer" aria-hidden="true">
               {regions.filter(region => (counts[region.id] ?? 0) === 0).map(region => (
-                <text key={region.id} className="marker-region-name empty-region-name" x={region.center[0]} y={region.center[1]}>{region.name}</text>
+                <text key={region.id} className="marker-region-name empty-region-name" x={region.center[0]} y={region.center[1] - 20}>{region.name}</text>
               ))}
             </g>
           )}
@@ -244,15 +244,15 @@ export function SongMap({ mapStyle, counts, selectedRegionId, onSelect }: SongMa
           <g className="marker-layer">
             {regions.map(region => {
               const count = counts[region.id] ?? 0
-              if (count === 0) return null
-              const radius = isClassic ? 15 + Math.sqrt(count / maxCount) * 15 : markerRadius(count, maxCount)
+              const isZero = count === 0
+              const radius = isZero ? 4 : isClassic ? 15 + Math.sqrt(count / maxCount) * 15 : markerRadius(count, maxCount)
               const [x, y] = region.center
               const isSelected = selectedRegionId === region.id
               return (
                 <g
                   key={region.id}
                   transform={`translate(${x} ${y})`}
-                  className={`region-marker${isSelected ? ' selected' : ''}`}
+                  className={`region-marker${isSelected ? ' selected' : ''}${isZero ? ' empty' : ''}`}
                   role="button"
                   tabIndex={0}
                   aria-label={`${region.name}，${count}首词，点击查看热度词选`}
@@ -266,19 +266,19 @@ export function SongMap({ mapStyle, counts, selectedRegionId, onSelect }: SongMa
                     }
                   }}
                 >
-                  <circle className="marker-hit" r={Math.max(radius + 16, 36)} />
-                  <circle className="marker-ripple" r={radius + 7} />
-                  {isClassic && showLabels && hoveredId !== region.id && <text className="marker-region-name" y={-radius - 15}>{region.name}</text>}
-                  <circle className="marker-core" r={radius} filter="url(#song-marker-shadow)" />
-                  <circle className="marker-inner-ring" r={radius - 4} />
-                  <text className="marker-count" y="1">{count}</text>
-                  <text className="marker-unit" y="13">首</text>
+                  <circle className="marker-hit" r={isZero ? 22 : Math.max(radius + 16, 36)} />
+                  {!isZero && <circle className="marker-ripple" r={radius + 7} />}
+                  {isClassic && showLabels && hoveredId !== region.id && !isZero && <text className="marker-region-name" y={-radius - 15}>{region.name}</text>}
+                  <circle className={`marker-core${isZero ? ' marker-core-zero' : ''}`} r={radius} filter="url(#song-marker-shadow)" />
+                  {!isZero && <circle className="marker-inner-ring" r={radius - 4} />}
+                  <text className={isZero ? 'marker-zero' : 'marker-count'} y={isZero ? 15 : 1}>{count}</text>
+                  {!isZero && <text className="marker-unit" y="13">首</text>}
                   {hoveredId === region.id && (
                     <g className="marker-tip" transform={`translate(0 ${-radius - 24})`} pointerEvents="none">
                       <rect x="-70" y="-46" width="140" height="40" rx="4" />
                       <path d="M-5 -6 L0 0 L5 -6 Z" />
                       <text className="tip-title" y="-29">{region.name} · {count}首</text>
-                      <text className="tip-sub" y="-15">点击查看热度前五</text>
+                      <text className="tip-sub" y="-15">{count > 0 ? '点击查看热度前五' : '暂无收录'}</text>
                     </g>
                   )}
                 </g>
