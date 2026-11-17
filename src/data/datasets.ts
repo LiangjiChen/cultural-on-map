@@ -110,7 +110,7 @@ export const collections: Record<CollectionId, Collection> = {
     defaultRegionId: 'liangzhe',
     navMap: '词地图',
     libraryName: '宋词三百',
-    heroKicker: 'NORTHERN SONG · 960—1127',
+    heroKicker: 'SONG DYNASTY · 960—1279',
     heroTitle: '把宋词，读回',
     heroEmphasis: '锦绣山河',
     heroIntro: '北宋二十四路，三百首词心坐标。循着地图，重逢汴京的灯、西湖的雨与塞下的秋。',
