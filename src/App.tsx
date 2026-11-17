@@ -191,8 +191,8 @@ export default function App() {
               </div>
               <div className="map-header-actions">
                 <div className="map-style-switch" role="group" aria-label="切换地图版本">
-                  <button className={mapStyle === 'classic' ? 'active' : ''} aria-pressed={mapStyle === 'classic'} onClick={() => setMapStyle('classic')}>原地图</button>
-                  <button className={mapStyle === 'realistic' ? 'active' : ''} aria-pressed={mapStyle === 'realistic'} onClick={() => setMapStyle('realistic')}>疆域图</button>
+                  <button className={mapStyle === 'classic' ? 'active' : ''} aria-pressed={mapStyle === 'classic'} onClick={() => setMapStyle('classic')}>专题地图</button>
+                  <button className={mapStyle === 'realistic' ? 'active' : ''} aria-pressed={mapStyle === 'realistic'} onClick={() => setMapStyle('realistic')}>对照地图</button>
                 </div>
                 <span className="live-badge"><i />{collection.mapBadge}</span>
                 <button className="map-library-button" onClick={() => openLibrary()}><BookOpen size={15} />{collection.mapAllButton}</button>

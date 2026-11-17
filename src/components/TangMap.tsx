@@ -11,6 +11,9 @@ interface TangMapProps {
   onSelect: (regionId: string) => void
 }
 
+const REALISTIC_VIEWBOX = { x: 380, y: 45, width: 700, height: 490 }
+const CLASSIC_CENTER = [550, 390] as const
+
 export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMapProps) {
   const [zoom, setZoom] = useState(1)
   const [showLabels, setShowLabels] = useState(true)
@@ -18,6 +21,15 @@ export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMa
   const scrollRef = useRef<HTMLDivElement>(null)
   const isClassic = mapStyle === 'classic'
   const regions = isClassic ? classicRegions : realisticRegions
+  const viewBox = isClassic
+    ? '0 0 1100 780'
+    : `${REALISTIC_VIEWBOX.x} ${REALISTIC_VIEWBOX.y} ${REALISTIC_VIEWBOX.width} ${REALISTIC_VIEWBOX.height}`
+  const zoomCenter = isClassic
+    ? CLASSIC_CENTER
+    : [REALISTIC_VIEWBOX.x + REALISTIC_VIEWBOX.width / 2, REALISTIC_VIEWBOX.y + REALISTIC_VIEWBOX.height / 2] as const
+  const compass = isClassic
+    ? { x: 1000, y: 92 }
+    : { x: REALISTIC_VIEWBOX.x + REALISTIC_VIEWBOX.width - 72, y: REALISTIC_VIEWBOX.y + 47 }
   const maxCount = useMemo(() => Math.max(1, ...Object.values(counts)), [counts])
   const markerLabels = useMemo(
     () => isClassic ? [] : layoutMapLabels(regions, counts, maxCount),
@@ -59,7 +71,7 @@ export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMa
       </div>
 
       <div className="map-scroll" ref={scrollRef}>
-        <svg viewBox="0 0 1100 780" className="map-svg" role="img" aria-label="唐朝开元年间十五道行政区划示意地图">
+        <svg viewBox={viewBox} className="map-svg" role="img" aria-label="唐朝开元年间十五道行政区划示意地图">
         <defs>
           <filter id="paper-grain">
             <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed="8" result="noise" />
@@ -87,7 +99,7 @@ export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMa
           <path d="M180 65 V735 M390 45 V750 M600 40 V755 M810 60 V740 M980 110 V690" />
         </g>
 
-        <g transform={`translate(550 390) scale(${zoom}) translate(-550 -390)`} className="zoom-layer">
+        <g transform={`translate(${zoomCenter[0]} ${zoomCenter[1]}) scale(${zoom}) translate(${-zoomCenter[0]} ${-zoomCenter[1]})`} className="zoom-layer">
           {isClassic ? (
             <>
               <g className="outer-territory" filter="url(#paper-grain)">
@@ -243,7 +255,7 @@ export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMa
           </g>
         </g>
 
-        <g className="map-compass" transform="translate(1000 92)" aria-hidden="true">
+        <g className="map-compass" transform={`translate(${compass.x} ${compass.y})`} aria-hidden="true">
           <text y="-25">北</text>
           <path d="M0 -18 L7 8 L0 4 L-7 8 Z" />
           <circle cy="4" r="15" />

@@ -44,7 +44,7 @@ function rectsOverlap(a: Rect, b: Rect, gap = 5) {
 function rectIntersectsCircle(rect: Rect, x: number, y: number, radius: number) {
   const nearestX = Math.max(rect.left, Math.min(x, rect.right))
   const nearestY = Math.max(rect.top, Math.min(y, rect.bottom))
-  return (nearestX - x) ** 2 + (nearestY - y) ** 2 < (radius + 4) ** 2
+  return (nearestX - x) ** 2 + (nearestY - y) ** 2 < (radius + 9) ** 2
 }
 
 const directions: [number, number, number][] = [

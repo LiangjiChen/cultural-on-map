@@ -11,6 +11,9 @@ interface SongMapProps {
   onSelect: (regionId: string) => void
 }
 
+const REALISTIC_VIEWBOX = { x: 215, y: -45, width: 670, height: 470 }
+const CLASSIC_CENTER = [550, 390] as const
+
 export function SongMap({ mapStyle, counts, selectedRegionId, onSelect }: SongMapProps) {
   const [zoom, setZoom] = useState(1)
   const [showLabels, setShowLabels] = useState(true)
@@ -18,6 +21,15 @@ export function SongMap({ mapStyle, counts, selectedRegionId, onSelect }: SongMa
   const scrollRef = useRef<HTMLDivElement>(null)
   const isClassic = mapStyle === 'classic'
   const regions = isClassic ? classicSongRegions : realisticRegions
+  const viewBox = isClassic
+    ? '0 0 1100 780'
+    : `${REALISTIC_VIEWBOX.x} ${REALISTIC_VIEWBOX.y} ${REALISTIC_VIEWBOX.width} ${REALISTIC_VIEWBOX.height}`
+  const zoomCenter = isClassic
+    ? CLASSIC_CENTER
+    : [REALISTIC_VIEWBOX.x + REALISTIC_VIEWBOX.width / 2, REALISTIC_VIEWBOX.y + REALISTIC_VIEWBOX.height / 2] as const
+  const compass = isClassic
+    ? { x: 1000, y: 92 }
+    : { x: REALISTIC_VIEWBOX.x + REALISTIC_VIEWBOX.width - 72, y: REALISTIC_VIEWBOX.y + 92 }
   const maxCount = useMemo(() => Math.max(1, ...Object.values(counts)), [counts])
   const markerLabels = useMemo(
     () => isClassic ? [] : layoutMapLabels(regions, counts, maxCount),
@@ -59,7 +71,7 @@ export function SongMap({ mapStyle, counts, selectedRegionId, onSelect }: SongMa
       </div>
 
       <div className="map-scroll" ref={scrollRef}>
-        <svg viewBox="0 0 1100 780" className="map-svg" role="img" aria-label="北宋元丰年间二十四路行政区划示意地图">
+        <svg viewBox={viewBox} className="map-svg" role="img" aria-label="北宋元丰年间二十四路行政区划示意地图">
         <defs>
           <linearGradient id="land-wash" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#e8ddc4" />
@@ -87,7 +99,7 @@ export function SongMap({ mapStyle, counts, selectedRegionId, onSelect }: SongMa
           <path d="M180 65 V735 M390 45 V750 M600 40 V755 M810 60 V740 M980 110 V690" />
         </g>
 
-        <g transform={`translate(550 390) scale(${zoom}) translate(-550 -390)`} className="zoom-layer">
+        <g transform={`translate(${zoomCenter[0]} ${zoomCenter[1]}) scale(${zoom}) translate(${-zoomCenter[0]} ${-zoomCenter[1]})`} className="zoom-layer">
           {isClassic ? (
             <>
               <g className="outer-territory" filter="url(#song-paper-grain)">
@@ -245,7 +257,7 @@ export function SongMap({ mapStyle, counts, selectedRegionId, onSelect }: SongMa
           </g>
         </g>
 
-        <g className="map-compass" transform="translate(1000 92)" aria-hidden="true">
+        <g className="map-compass" transform={`translate(${compass.x} ${compass.y})`} aria-hidden="true">
           <text y="-25">北</text>
           <path d="M0 -18 L7 8 L0 4 L-7 8 Z" />
           <circle cy="4" r="15" />
