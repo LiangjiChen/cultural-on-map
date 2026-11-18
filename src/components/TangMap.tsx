@@ -138,6 +138,10 @@ export function TangMap({ mapStyle, counts, selectedRegionId, onSelect }: TangMa
             <>
               <g className="outer-territory" filter="url(#paper-grain)">
                 {tangOuterRegions.map((territory) => <path key={territory.id} d={territory.path} />)}
+                {/* 安西都护府辖区（天山南路） */}
+                <path className="protectorate-region" d="M385 195 L395 155 L420 130 L455 115 L490 120 L515 140 L525 170 L510 200 L480 220 L445 225 L410 215 L390 205 Z" />
+                {/* 北庭都护府辖区（天山北路） */}
+                <path className="protectorate-region" d="M425 115 L440 80 L470 60 L505 55 L540 65 L565 85 L570 110 L550 135 L520 150 L485 155 L455 145 L435 130 Z" />
               </g>
               <g className="outer-territory-labels" aria-hidden="true">
                 {tangLabels.map((label) => (

@@ -227,6 +227,7 @@ main { max-width: 1540px; margin: 0 auto; padding: 0 32px; }
 .outer-territory path { fill: #ded6c2; stroke: #a99c82; stroke-width: 1.2; stroke-dasharray: 5 4; opacity: .75; fill-rule: evenodd; }
 .outer-territory-labels text { font-family: var(--serif); font-size: 12px; fill: #91856f; letter-spacing: 2px; text-anchor: middle; }
 .outer-territory-labels .outer-territory-sub { font-size: 9px; opacity: .7; }
+.protectorate-region { fill: #e8e0d0; stroke: #b0a088; stroke-width: 1; stroke-dasharray: 4 3; opacity: .6; fill-rule: evenodd; }
 .region-shape { fill: url(#land-wash); stroke: none; cursor: pointer; transition: fill .18s, opacity .18s; fill-rule: evenodd; }
 .region-shape:hover, .region-shape.hovered { fill: #e4cfab; }
 .region-shape.selected { fill: #dec0a0; }
