@@ -243,7 +243,7 @@ function drawMap(slide, x, y, w, h, realistic = false) {
     ["人", "提出方向", "决定做什么\n判断好不好\n核验历史与体验", C.paleRed],
     ["AI", "加速实现", "生成网页与脚本\n根据反馈修改\n协助排查问题", C.paleGold],
     ["源", "开放数据", "开源诗词文本\n公开地理数据\n历史区划研究", C.paleBlue],
-    ["网", "发布传播", "浏览器呈现\n双平台上线\n短链便捷分享", C.card],
+    ["网", "发布传播", "浏览器呈现\nTraesite 上线\n链接便捷分享", C.card],
   ];
   roles.forEach((r, i) => {
     const x = 0.5 + i * 2.28;
@@ -272,7 +272,7 @@ function drawMap(slide, x, y, w, h, realistic = false) {
     ["React + TypeScript", "网页积木 + 拼写检查", "组织页面结构，提前发现差错"],
     ["SVG", "可无限放大的数字地图", "绘制区域、圆点、边界与地名"],
     ["Python + Shapely + PyProj", "地理数据整理与坐标换算", "清洗疆域数据，生成可用地图"],
-    ["Vercel + Traesite + TinyURL", "发布网站与分享入口", "海外及国内访问、统一短链"],
+    ["Traesite", "网站发布与访问", "发布网站，提供统一访问入口"],
   ];
   rows.forEach((r, i) => {
     const y = 1.93 + i * 0.59;
@@ -486,8 +486,8 @@ function drawMap(slide, x, y, w, h, realistic = false) {
     slide.addText(p, { x: 1.25, y: 2.34 + i * 0.7, w: 6.9, h: 0.32, fontSize: 14, color: "E4ECEA", fontFace: FONT_BODY });
   });
   slide.addShape(pres.shapes.RECTANGLE, { x: 6.55, y: 0.78, w: 2.75, h: 1.1, fill: { color: C.primary2 }, line: { color: "567681", width: 0.7 } });
-  slide.addText("便于记忆的短链入口", { x: 6.77, y: 0.98, w: 2.3, h: 0.23, fontSize: 11, color: "C7D7D6", fontFace: FONT_BODY, align: "center" });
-  slide.addText("tinyurl.com/\ncultural-on-map", { x: 6.77, y: 1.3, w: 2.3, h: 0.42, fontSize: 13, bold: true, color: C.white, fontFace: FONT_BODY, align: "center", lineSpacing: 18 });
+  slide.addText("Traesite 访问地址", { x: 6.77, y: 0.98, w: 2.3, h: 0.23, fontSize: 11, color: "C7D7D6", fontFace: FONT_BODY, align: "center" });
+  slide.addText("37k39efxx9ty2kvgaxg.\ntraesite.cn", { x: 6.77, y: 1.3, w: 2.3, h: 0.42, fontSize: 13, bold: true, color: C.white, fontFace: FONT_BODY, align: "center", lineSpacing: 18 });
   slide.addText("诗词山河 · 让每一首诗回到它诞生的山河之间", { x: 0.68, y: 4.85, w: 8.65, h: 0.28, fontSize: 13, color: "AFC4C5", fontFace: FONT_TITLE });
   slide.render();
 }
