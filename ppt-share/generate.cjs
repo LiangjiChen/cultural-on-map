@@ -492,7 +492,7 @@ function drawMap(slide, x, y, w, h, realistic = false) {
   slide.render();
 }
 
-const outputPath = "/workspace/ppt-share/诗词山河-科普分享.pptx";
+const outputPath = "/workspace/ppt-share/诗词山河-创作分享.pptx";
 pres.writeFile({ fileName: outputPath }).then(() => {
   console.log("PPT saved to:", outputPath);
 }).catch(err => {
