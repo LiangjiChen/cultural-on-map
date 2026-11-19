@@ -121,7 +121,7 @@ function addNumberCircle(slide, text, x, y, d = 0.42, fill = C.secondary) {
   slide.addText(text, { x, y: y + 0.055, w: d, h: d - 0.1, fontSize: 14, bold: true, align: "center", color: C.white, fontFace: FONT_BODY });
 }
 function drawMap(slide, x, y, w, h, realistic = false) {
-  const path = realistic ? "/workspace/ppt-share/assets/map_reference_1200x700.png" : "/workspace/ppt-share/assets/map_thematic_1200x700.png";
+  const path = realistic ? "/workspace/ppt-share/assets/map_reference_582x373.png" : "/workspace/ppt-share/assets/map_thematic_1200x700.png";
   slide.addImage({ path, x, y, w, h });
 }
 
