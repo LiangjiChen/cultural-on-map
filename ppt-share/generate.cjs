@@ -1,10 +1,7 @@
 const pptxgen = require("pptxgenjs");
 
-// ============================================================
-// SLIDE DIMENSIONS
-// ============================================================
 const pres = new pptxgen();
-pres.layout = 'LAYOUT_16x9';
+pres.layout = "LAYOUT_16x9";
 const SLIDE_W = 10;
 const SLIDE_H = 5.625;
 const MARGIN = 0.5;
@@ -14,28 +11,29 @@ const CONTENT_W = SLIDE_W - 2 * MARGIN;
 const CONTENT_H = SLIDE_H - 2 * MARGIN;
 const CENTER_X = SLIDE_W / 2;
 
-// ============================================================
-// COLOR PALETTE - 中国风 · 藏青朱砂
-// ============================================================
 const C = {
-  primary: "1a3a4a",    // 藏青
-  secondary: "c8402a",  // 朱砂
-  accent: "d4a849",     // 金色
-  bg: "f5f1e8",         // 米白
-  bgCard: "ede8dc",     // 卡片底
-  text: "2c2c2c",       // 正文
-  textLight: "6b6b6b",  // 次要文字
-  white: "ffffff",
-  lightBorder: "d4cfc0",
+  primary: "183B45",
+  primary2: "285866",
+  secondary: "B64A32",
+  accent: "D2A64E",
+  bg: "F7F2E8",
+  card: "EEE6D7",
+  cardLight: "FBF8F1",
+  text: "293638",
+  muted: "6E7774",
+  border: "D9CFBC",
+  white: "FFFFFF",
+  paleBlue: "DCE8E7",
+  paleRed: "F0DDD3",
+  paleGold: "F1E6C9",
 };
+const FONT_TITLE = "Noto Serif CJK SC";
+const FONT_BODY = "Noto Sans CJK SC";
 
-// ============================================================
-// CONTAINER SYSTEM WITH TEXT OVERFLOW PROTECTION
-// ============================================================
+// Container system: relative positioning, z-ordering and text shrink protection.
 function parseImageDimensions(path) {
   const match = path.match(/_(\d+)x(\d+)\.(png|jpg|jpeg|gif|webp)$/i);
-  if (match) return { width: parseInt(match[1]), height: parseInt(match[2]) };
-  return null;
+  return match ? { width: parseInt(match[1]), height: parseInt(match[2]) } : null;
 }
 function calculateScaledImageOpts(opts) {
   const { path, w: targetW, h: targetH, x = 0, y = 0, ...rest } = opts;
@@ -57,711 +55,447 @@ function calculateScaledImageOpts(opts) {
 function createVirtualNode(type, data, parentX = 0, parentY = 0) {
   const opts = data.opts || {};
   const node = { type, data, absX: parentX + (opts.x || 0), absY: parentY + (opts.y || 0), w: opts.w || 0, h: opts.h || 0, children: [] };
-  node.addShape = function(shapeType, opts = {}) { const child = createVirtualNode('shape', { shapeType, opts }, node.absX, node.absY); node.children.push(child); return child; };
+  node.addShape = function(shapeType, opts = {}) { const child = createVirtualNode("shape", { shapeType, opts }, node.absX, node.absY); node.children.push(child); return child; };
   node.addText = function(text, opts = {}) {
     const safeOpts = { fit: "shrink", ...opts };
     const bulletRe = /^(?:[•◦⁃∙·●○–—]\s*|\-\s+)/;
     if (Array.isArray(text)) {
-      text = text.map(item => {
-        if (item && item.options && item.options.bullet && typeof item.text === 'string') {
-          return { ...item, text: item.text.replace(bulletRe, '') };
-        }
-        return item;
-      });
+      text = text.map(item => item && item.options && item.options.bullet && typeof item.text === "string" ? { ...item, text: item.text.replace(bulletRe, "") } : item);
     }
-    const child = createVirtualNode('text', { text, opts: safeOpts }, node.absX, node.absY);
+    const child = createVirtualNode("text", { text, opts: safeOpts }, node.absX, node.absY);
     node.children.push(child); return child;
   };
-  node.addImage = function(opts = {}) { const scaledOpts = calculateScaledImageOpts(opts); const child = createVirtualNode('image', { opts: scaledOpts }, node.absX, node.absY); node.children.push(child); return child; };
-  node.addTable = function(tableData, opts = {}) { const child = createVirtualNode('table', { tableData, opts }, node.absX, node.absY); node.children.push(child); return child; };
+  node.addImage = function(opts = {}) { const child = createVirtualNode("image", { opts: calculateScaledImageOpts(opts) }, node.absX, node.absY); node.children.push(child); return child; };
+  node.addTable = function(tableData, opts = {}) { const child = createVirtualNode("table", { tableData, opts }, node.absX, node.absY); node.children.push(child); return child; };
   return node;
 }
-function flattenNode(node, realSlide, pres) {
+function flattenNode(node, realSlide) {
   const absOpts = { ...node.data.opts, x: node.absX, y: node.absY };
-  if (node.type === 'shape') realSlide.addShape(node.data.shapeType, absOpts);
-  else if (node.type === 'text') realSlide.addText(node.data.text, absOpts);
-  else if (node.type === 'image') realSlide.addImage(absOpts);
-  else if (node.type === 'table') realSlide.addTable(node.data.tableData, absOpts);
-  node.children.forEach(child => flattenNode(child, realSlide, pres));
+  if (node.type === "shape") realSlide.addShape(node.data.shapeType, absOpts);
+  else if (node.type === "text") realSlide.addText(node.data.text, absOpts);
+  else if (node.type === "image") realSlide.addImage(absOpts);
+  else if (node.type === "table") realSlide.addTable(node.data.tableData, absOpts);
+  node.children.forEach(child => flattenNode(child, realSlide));
 }
 const originalAddSlide = pres.addSlide.bind(pres);
 pres.addSlide = function(options) {
   const realSlide = originalAddSlide(options);
-  const virtualSlide = {
+  return {
     children: [], _realSlide: realSlide,
     set background(val) { realSlide.background = val; },
     get background() { return realSlide.background; },
-    addShape: function(shapeType, opts = {}) { const node = createVirtualNode('shape', { shapeType, opts }, 0, 0); this.children.push(node); return node; },
-    addText: function(text, opts = {}) { const safeOpts = { fit: "shrink", ...opts }; const node = createVirtualNode('text', { text, opts: safeOpts }, 0, 0); this.children.push(node); return node; },
-    addImage: function(opts = {}) { const scaledOpts = calculateScaledImageOpts(opts); const node = createVirtualNode('image', { opts: scaledOpts }, node.absX, node.absY); this.children.push(node); return node; },
-    addTable: function(tableData, opts = {}) { const node = createVirtualNode('table', { tableData, opts }, 0, 0); this.children.push(node); return node; },
-    addChart: function(chartType, data, opts = {}) { realSlide.addChart(chartType, data, opts); },
-    render: function() { this.children.forEach(child => flattenNode(child, realSlide, pres)); }
+    addShape(shapeType, opts = {}) { const node = createVirtualNode("shape", { shapeType, opts }, 0, 0); this.children.push(node); return node; },
+    addText(text, opts = {}) { const node = createVirtualNode("text", { text, opts: { fit: "shrink", ...opts } }, 0, 0); this.children.push(node); return node; },
+    addImage(opts = {}) { const node = createVirtualNode("image", { opts: calculateScaledImageOpts(opts) }, 0, 0); this.children.push(node); return node; },
+    addTable(tableData, opts = {}) { const node = createVirtualNode("table", { tableData, opts }, 0, 0); this.children.push(node); return node; },
+    addChart(chartType, data, opts = {}) { realSlide.addChart(chartType, data, opts); },
+    render() { this.children.forEach(child => flattenNode(child, realSlide)); },
   };
-  return virtualSlide;
 };
-// ============================================================
-// HELPER FUNCTIONS
-// ============================================================
-const FONT_TITLE = "SimSun";
-const FONT_BODY = "Noto Sans CJK SC";
 
-function addSlideTitle(slide, title, subtitle) {
-  slide.addText(title, {
-    x: CONTENT_X, y: CONTENT_Y, w: CONTENT_W, h: 0.6,
-    fontSize: 28, bold: true, color: C.primary, fontFace: FONT_TITLE,
-    charSpacing: 1.5,
-  });
-  if (subtitle) {
-    slide.addText(subtitle, {
-      x: CONTENT_X, y: CONTENT_Y + 0.55, w: CONTENT_W, h: 0.35,
-      fontSize: 14, color: C.textLight, fontFace: FONT_BODY,
-    });
-  }
-  // accent line
-  slide.addShape(pres.shapes.RECTANGLE, {
-    x: CONTENT_X, y: CONTENT_Y + (subtitle ? 0.95 : 0.65), w: 0.8, h: 0.04,
-    fill: { color: C.secondary },
-  });
+function addHeader(slide, section, title, minutes, page) {
+  slide.background = { color: C.bg };
+  slide.addText(section, { x: CONTENT_X, y: 0.34, w: 5.8, h: 0.25, fontSize: 10.5, bold: true, color: C.secondary, fontFace: FONT_BODY, charSpacing: 1.2 });
+  slide.addText(title, { x: CONTENT_X, y: 0.68, w: 7.8, h: 0.55, fontSize: 28, bold: true, color: C.primary, fontFace: FONT_TITLE, charSpacing: 1 });
+  slide.addShape(pres.shapes.RECTANGLE, { x: 8.35, y: 0.42, w: 1.15, h: 0.38, fill: { color: C.paleRed }, line: { color: C.paleRed } });
+  slide.addText(minutes, { x: 8.35, y: 0.48, w: 1.15, h: 0.22, fontSize: 11, bold: true, align: "center", color: C.secondary, fontFace: FONT_BODY });
+  slide.addText(String(page).padStart(2, "0"), { x: 9.1, y: 5.18, w: 0.4, h: 0.18, fontSize: 9, color: C.muted, fontFace: FONT_BODY, align: "right" });
 }
-
-function addBulletList(slide, items, x, y, w, opts = {}) {
-  const { fontSize = 14, color = C.text, lineSpacing = 28, bulletColor = C.secondary } = opts;
-  const textItems = items.map(item => ({
-    text: item,
-    options: {
-      fontSize, color, fontFace: FONT_BODY,
-      bullet: { code: "2022", color: bulletColor },
-      lineSpacing,
-    }
-  }));
-  slide.addText(textItems, { x, y, w, h: items.length * (lineSpacing / 72) + 0.2, valign: "top" });
-}
-
 function addCard(slide, x, y, w, h, title, body, opts = {}) {
-  const { bgColor = C.bgCard, titleColor = C.primary, bodyColor = C.text, titleSize = 16, bodySize = 12, icon } = opts;
-  slide.addShape(pres.shapes.RECTANGLE, {
-    x, y, w, h, fill: { color: bgColor }, line: { color: C.lightBorder, width: 0.5 },
-    rectRadius: 0.08,
-  });
-  let tx = x + 0.2;
-  if (icon) {
-    slide.addText(icon, { x: x + 0.15, y: y + 0.15, w: 0.4, h: 0.4, fontSize: 20, align: "center" });
-    tx = x + 0.55;
-  }
-  slide.addText(title, {
-    x: tx, y: y + 0.15, w: w - (tx - x) - 0.15, h: 0.35,
-    fontSize: titleSize, bold: true, color: titleColor, fontFace: FONT_TITLE,
-  });
-  slide.addText(body, {
-    x: x + 0.2, y: y + 0.55, w: w - 0.4, h: h - 0.7,
-    fontSize: bodySize, color: bodyColor, fontFace: FONT_BODY, valign: "top",
-    lineSpacing: bodySize * 1.8,
-  });
+  const fill = opts.fill || C.cardLight;
+  const accent = opts.accent || C.secondary;
+  slide.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: fill }, line: { color: opts.line || C.border, width: 0.7 } });
+  slide.addShape(pres.shapes.RECTANGLE, { x, y, w: 0.055, h, fill: { color: accent }, line: { color: accent } });
+  slide.addText(title, { x: x + 0.2, y: y + 0.16, w: w - 0.38, h: 0.34, fontSize: opts.titleSize || 16, bold: true, color: opts.titleColor || C.primary, fontFace: FONT_TITLE });
+  slide.addText(body, { x: x + 0.2, y: y + 0.61, w: w - 0.4, h: h - 0.76, fontSize: opts.bodySize || 13.5, color: opts.bodyColor || C.text, fontFace: FONT_BODY, valign: "top", lineSpacing: opts.lineSpacing || 22, breakLine: false });
+}
+function addPill(slide, text, x, y, w, opts = {}) {
+  slide.addShape(pres.shapes.RECTANGLE, { x, y, w, h: 0.38, fill: { color: opts.fill || C.paleGold }, line: { color: opts.fill || C.paleGold } });
+  slide.addText(text, { x: x + 0.06, y: y + 0.075, w: w - 0.12, h: 0.22, fontSize: opts.fontSize || 11.5, bold: true, align: "center", color: opts.color || C.primary, fontFace: FONT_BODY });
+}
+function addArrow(slide, x, y, w = 0.36) {
+  slide.addShape(pres.shapes.RIGHT_ARROW, { x, y, w, h: 0.25, fill: { color: C.accent }, line: { color: C.accent } });
+}
+function addNumberCircle(slide, text, x, y, d = 0.42, fill = C.secondary) {
+  slide.addShape(pres.shapes.OVAL, { x, y, w: d, h: d, fill: { color: fill }, line: { color: fill } });
+  slide.addText(text, { x, y: y + 0.055, w: d, h: d - 0.1, fontSize: 14, bold: true, align: "center", color: C.white, fontFace: FONT_BODY });
+}
+function drawMap(slide, x, y, w, h, realistic = false) {
+  const path = realistic ? "/workspace/ppt-share/assets/map_reference_1200x700.png" : "/workspace/ppt-share/assets/map_thematic_1200x700.png";
+  slide.addImage({ path, x, y, w, h });
 }
 
-// ============================================================
-// SLIDE 1: COVER
-// ============================================================
+// 1. Cover
 {
   const slide = pres.addSlide();
   slide.background = { color: C.primary };
-
-  // decorative top border
-  slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: SLIDE_W, h: 0.06, fill: { color: C.accent } });
-  slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: SLIDE_H - 0.06, w: SLIDE_W, h: 0.06, fill: { color: C.accent } });
-
-  // main title
-  slide.addText("诗词山河", {
-    x: 0, y: 1.2, w: SLIDE_W, h: 1.2,
-    fontSize: 54, bold: true, color: C.white, fontFace: FONT_TITLE,
-    align: "center", charSpacing: 4,
-  });
-
-  // subtitle
-  slide.addText("地图上的诗词 · 开发分享", {
-    x: 0, y: 2.4, w: SLIDE_W, h: 0.6,
-    fontSize: 24, color: C.accent, fontFace: FONT_TITLE,
-    align: "center", charSpacing: 2,
-  });
-
-  // description
-  slide.addText("从一句话需求到六百首诗词的山河画卷", {
-    x: 0, y: 3.2, w: SLIDE_W, h: 0.4,
-    fontSize: 14, color: "a0b4c0", fontFace: FONT_BODY,
-    align: "center",
-  });
-
-  // bottom info
-  slide.addText("分享 + 讨论 · 60分钟", {
-    x: 0, y: 4.3, w: SLIDE_W, h: 0.3,
-    fontSize: 12, color: "8098a8", fontFace: FONT_BODY, align: "center",
-  });
-
+  slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 0.12, h: SLIDE_H, fill: { color: C.accent }, line: { color: C.accent } });
+  slide.addShape(pres.shapes.OVAL, { x: 7.25, y: 0.65, w: 2.1, h: 2.1, fill: { color: C.primary2, transparency: 20 }, line: { color: C.accent, width: 1.2 } });
+  slide.addShape(pres.shapes.OVAL, { x: 7.75, y: 1.15, w: 1.1, h: 1.1, fill: { color: C.secondary, transparency: 5 }, line: { color: C.secondary } });
+  slide.addText("诗", { x: 7.75, y: 1.35, w: 1.1, h: 0.6, fontSize: 34, bold: true, align: "center", color: C.white, fontFace: FONT_TITLE });
+  slide.addText("一场关于诗词、地理与 AI 的科普分享", { x: 0.75, y: 0.72, w: 6.4, h: 0.3, fontSize: 13, color: C.accent, fontFace: FONT_BODY, charSpacing: 1.2 });
+  slide.addText("诗词山河", { x: 0.72, y: 1.35, w: 6.5, h: 0.9, fontSize: 46, bold: true, color: C.white, fontFace: FONT_TITLE, charSpacing: 3 });
+  slide.addText("让每一首诗，回到它诞生的山河之间", { x: 0.75, y: 2.48, w: 7.6, h: 0.45, fontSize: 21, color: "E8DDC5", fontFace: FONT_TITLE, charSpacing: 0.8 });
+  slide.addText("从一句需求，到 600 首唐宋诗词的可探索地图", { x: 0.75, y: 3.17, w: 7.7, h: 0.35, fontSize: 14, color: "B9CCCE", fontFace: FONT_BODY });
+  addPill(slide, "600 首诗词", 0.75, 3.88, 1.55, { fill: C.primary2, color: C.white });
+  addPill(slide, "39 个历史区域", 2.48, 3.88, 1.85, { fill: C.primary2, color: C.white });
+  addPill(slide, "4 个开发日", 4.51, 3.88, 1.55, { fill: C.primary2, color: C.white });
+  slide.addText("40 分钟分享  +  20 分钟提问", { x: 0.75, y: 4.77, w: 4.8, h: 0.3, fontSize: 13, bold: true, color: C.accent, fontFace: FONT_BODY });
   slide.render();
 }
 
-// ============================================================
-// SLIDE 2: TABLE OF CONTENTS
-// ============================================================
+// 2. Agenda
 {
   const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "目录", "CONTENTS");
-
+  addHeader(slide, "分享路线", "今天，我们沿着四个问题前进", "1 分钟", 2);
   const items = [
-    { num: "01", title: "项目背景与目标", desc: "从需求到产品定位" },
-    { num: "02", title: "技术栈与工具", desc: "React · Vite · Trae AI" },
-    { num: "03", title: "关键开发步骤", desc: "数据建设 → 地图 → 交互 → 优化" },
-    { num: "04", title: "部署与上线", desc: "Vercel + Traesite 双平台" },
-    { num: "05", title: "挑战与解决", desc: "真实疆域、标签避让、移动端" },
-    { num: "06", title: "总结与讨论", desc: "经验沉淀 · Q&A" },
+    ["01", "为什么做？", "诗词为什么需要一张地图\n先看看最终成品", "第 3—4 页", C.paleRed],
+    ["02", "怎样做出来？", "时间线、工具分工\n以及五个关键步骤", "第 5—12 页", C.paleGold],
+    ["03", "如何上线与迭代？", "发布到互联网\n在使用反馈中持续修正", "第 13—14 页", C.paleBlue],
+    ["04", "带来什么启发？", "数字人文的价值\n应用场景与开放讨论", "第 15—16 页", C.card],
   ];
-
-  const startY = 1.55;
-  const rowH = 0.5;
-  items.forEach((item, i) => {
-    const y = startY + i * rowH;
-    // number
-    slide.addText(item.num, {
-      x: CONTENT_X + 0.2, y, w: 0.6, h: 0.4,
-      fontSize: 20, bold: true, color: C.accent, fontFace: FONT_TITLE,
-    });
-    // title
-    slide.addText(item.title, {
-      x: CONTENT_X + 0.9, y, w: 3, h: 0.4,
-      fontSize: 18, bold: true, color: C.primary, fontFace: FONT_TITLE,
-    });
-    // desc
-    slide.addText(item.desc, {
-      x: CONTENT_X + 4.2, y: y + 0.03, w: 4, h: 0.35,
-      fontSize: 13, color: C.textLight, fontFace: FONT_BODY,
-    });
+  items.forEach((it, i) => {
+    const x = CONTENT_X + (i % 2) * 4.6;
+    const y = 1.48 + Math.floor(i / 2) * 1.55;
+    slide.addShape(pres.shapes.RECTANGLE, { x, y, w: 4.4, h: 1.32, fill: { color: it[4] }, line: { color: C.border, width: 0.6 } });
+    slide.addText(it[0], { x: x + 0.2, y: y + 0.18, w: 0.55, h: 0.4, fontSize: 23, bold: true, color: C.secondary, fontFace: FONT_TITLE });
+    slide.addText(it[1], { x: x + 0.88, y: y + 0.18, w: 2.9, h: 0.35, fontSize: 17, bold: true, color: C.primary, fontFace: FONT_TITLE });
+    slide.addText(it[2], { x: x + 0.88, y: y + 0.61, w: 2.85, h: 0.52, fontSize: 12.5, color: C.text, fontFace: FONT_BODY, lineSpacing: 19 });
+    slide.addText(it[3], { x: x + 3.0, y: y + 0.96, w: 1.2, h: 0.2, fontSize: 9.5, color: C.muted, fontFace: FONT_BODY, align: "right" });
   });
-
-  slide.addText("时间建议：背景与工具 8′ · 关键步骤 20′ · 部署与挑战 7′ · 成果与总结 5′ · 讨论 20′", {
-    x: CONTENT_X + 0.2, y: 4.72, w: CONTENT_W - 0.4, h: 0.32,
-    fontSize: 11, color: C.secondary, fontFace: FONT_BODY, bold: true,
-  });
-
+  slide.addText("分享 40 分钟", { x: 1.0, y: 4.73, w: 2.1, h: 0.3, fontSize: 14, bold: true, color: C.primary, fontFace: FONT_BODY, align: "center" });
+  addArrow(slide, 3.35, 4.75, 0.55);
+  slide.addText("提问与讨论 20 分钟", { x: 4.2, y: 4.73, w: 2.8, h: 0.3, fontSize: 14, bold: true, color: C.secondary, fontFace: FONT_BODY, align: "center" });
   slide.render();
 }
 
-// ============================================================
-// SLIDE 3: PROJECT BACKGROUND
-// ============================================================
+// 3. Why
 {
   const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "项目背景与目标", "BACKGROUND & GOALS");
-
-  // left: origin
-  addCard(slide, CONTENT_X, 1.6, 4.2, 1.8, "一句话需求", "\"地图上的唐诗\"\n展示唐朝十五道地图，收录300首诗\n点击聚合点查看Top5，支持详情和分页", { titleSize: 18, bodySize: 13 });
-
-  // right: evolution
-  addCard(slide, CONTENT_X + 4.6, 1.6, 4.2, 1.8, "持续演进", "→ 新增宋词300首 + 北宋二十四路\n→ 真实疆域地图 + 双地图切换\n→ 移动端适配 + 手势交互\n→ 都护府虚线边界叠加", { titleSize: 18, bodySize: 13 });
-
-  // bottom: product positioning
-  slide.addShape(pres.shapes.RECTANGLE, {
-    x: CONTENT_X, y: 3.7, w: CONTENT_W, h: 1.3,
-    fill: { color: C.primary }, rectRadius: 0.08,
-  });
-  slide.addText("产品定位", {
-    x: CONTENT_X + 0.3, y: 3.85, w: 2, h: 0.3,
-    fontSize: 14, bold: true, color: C.accent, fontFace: FONT_BODY,
-  });
-  slide.addText("诗词山河 —— 一个以地图为载体、以诗词为内容的交互式文化探索应用。\n让每一首诗回到它诞生的山河之间。", {
-    x: CONTENT_X + 0.3, y: 4.15, w: CONTENT_W - 0.6, h: 0.7,
-    fontSize: 15, color: C.white, fontFace: FONT_BODY, lineSpacing: 24,
-  });
-
-  slide.render();
-}
-
-// ============================================================
-// SLIDE 4: TECH STACK
-// ============================================================
-{
-  const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "技术栈与工具", "TECH STACK & TOOLS");
-
-  const stacks = [
-    { icon: "⚛️", title: "前端框架", items: "React 19\nTypeScript 5.7\nVite 6" },
-    { icon: "🗺️", title: "地图与可视化", items: "SVG 矢量地图\nPyProj (Albers投影)\nShapely (几何计算)" },
-    { icon: "🎨", title: "UI 与样式", items: "Lucide React 图标\n原生 CSS (响应式)\n安全区适配" },
-    { icon: "🚀", title: "部署与运维", items: "Vercel (生产环境)\nTraesite (国内镜像)\nTinyURL 短链" },
+  addHeader(slide, "01 为什么做", "读诗时，我们也在读一段旅程", "3 分钟", 3);
+  slide.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: 1.48, w: 4.15, h: 3.25, fill: { color: C.primary }, line: { color: C.primary } });
+  slide.addText("故人西辞黄鹤楼，\n烟花三月下扬州。", { x: 0.85, y: 2.0, w: 3.45, h: 1.15, fontSize: 25, bold: true, color: C.white, fontFace: FONT_TITLE, breakLine: false, lineSpacing: 39, charSpacing: 1 });
+  slide.addText("—— 李白《黄鹤楼送孟浩然之广陵》", { x: 0.85, y: 3.45, w: 3.35, h: 0.3, fontSize: 11.5, color: "D7C9AA", fontFace: FONT_BODY });
+  slide.addText("诗里有地名，地名背后是空间、距离与人生。", { x: 0.85, y: 4.08, w: 3.25, h: 0.42, fontSize: 13, color: "D9E4E3", fontFace: FONT_BODY });
+  const qs = [
+    ["在哪里？", "黄鹤楼与扬州，在地图上相距多远？"],
+    ["怎样走？", "从武昌到扬州，为什么顺江而下？"],
+    ["还有什么？", "同一片山河，还留下过哪些诗词？"],
   ];
-
-  const cardW = (CONTENT_W - 0.6) / 4;
-  stacks.forEach((s, i) => {
-    const x = CONTENT_X + i * (cardW + 0.2);
-    addCard(slide, x, 1.7, cardW, 2.8, s.title, s.items, {
-      icon: s.icon, titleSize: 14, bodySize: 12,
-    });
-  });
-
-  // bottom: dev tool
-  slide.addShape(pres.shapes.RECTANGLE, {
-    x: CONTENT_X, y: 4.7, w: CONTENT_W, h: 0.5,
-    fill: { color: C.bgCard }, rectRadius: 0.06,
-  });
-  slide.addText("🤖 开发方式：Trae AI 辅助开发 —— 自然语言描述需求，AI 生成代码并迭代优化", {
-    x: CONTENT_X + 0.2, y: 4.78, w: CONTENT_W - 0.4, h: 0.35,
-    fontSize: 13, color: C.primary, fontFace: FONT_BODY,
-  });
-
+  qs.forEach((q, i) => addCard(slide, 4.95, 1.48 + i * 1.02, 4.55, 0.86, q[0], q[1], { bodySize: 12.5, titleSize: 15, lineSpacing: 18, accent: i === 1 ? C.accent : C.secondary }));
+  slide.addText("项目的起点：把“阅读一首诗”，变成“探索一方山河”。", { x: 4.98, y: 4.63, w: 4.45, h: 0.32, fontSize: 14, bold: true, color: C.secondary, fontFace: FONT_BODY });
   slide.render();
 }
 
-// ============================================================
-// SLIDE 5: ARCHITECTURE
-// ============================================================
+// 4. Product journey
 {
   const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "整体架构", "ARCHITECTURE");
-
-  // Architecture diagram using native shapes
-  const layers = [
-    { label: "App.tsx (入口 + 状态管理)", color: C.primary, textColor: C.white, y: 1.7 },
-    { label: "TangMap / SongMap (SVG地图)", color: "2a5a6a", textColor: C.white, y: 2.4 },
-    { label: "RegionPanel (区域Top5) | PoemLibrary (全量诗库)", color: "3a7a8a", textColor: C.white, y: 3.1 },
-    { label: "PoemModal (详情弹窗) | HelpModal | AboutModal", color: "4a9aaa", textColor: C.white, y: 3.8 },
-    { label: "数据层: poems.ts (300唐诗) | songPoems.ts (300宋词) | regions.ts | mapGeometry.ts", color: C.bgCard, textColor: C.text, y: 4.5 },
-  ];
-
-  layers.forEach((layer, i) => {
-    slide.addShape(pres.shapes.RECTANGLE, {
-      x: CONTENT_X + 0.5, y: layer.y, w: CONTENT_W - 1, h: 0.5,
-      fill: { color: layer.color }, rectRadius: 0.06,
-    });
-    slide.addText(layer.label, {
-      x: CONTENT_X + 0.7, y: layer.y + 0.08, w: CONTENT_W - 1.4, h: 0.35,
-      fontSize: 12, color: layer.textColor, fontFace: FONT_BODY,
-    });
-    // arrow
-    if (i < layers.length - 1) {
-      slide.addShape(pres.shapes.DOWN_ARROW, {
-        x: CENTER_X - 0.1, y: layer.y + 0.52, w: 0.2, h: 0.15,
-        fill: { color: C.accent },
-      });
-    }
-  });
-
-  slide.render();
-}
-
-// ============================================================
-// SLIDE 6: STEP 1 - DATA
-// ============================================================
-{
-  const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "Step 1: 数据建设", "DATA CONSTRUCTION");
-
-  // Left: Tang data
-  addCard(slide, CONTENT_X, 1.7, 4.2, 1.5, "唐诗 300 首", "按十五道归类\n每首含：标题/作者/正文/解释/地理注\n数据来源：chinese-poetry (GitHub开源)", { titleSize: 16, bodySize: 12 });
-
-  // Right: Song data
-  addCard(slide, CONTENT_X + 4.6, 1.7, 4.2, 1.5, "宋词 300 首", "按北宋二十四路归类\n同结构：标题/作者/正文/解释/地理注\n6个数据文件合并", { titleSize: 16, bodySize: 12 });
-
-  // Bottom: region data
-  addCard(slide, CONTENT_X, 3.4, CONTENT_W, 1.5, "行政区划数据", "唐：十五道（京畿道、河南道、陇右道、江南东道等）\n宋：二十四路（京畿路、两浙路、河东路、成都府路等）\n每条含：名称 / 治所 / 今属地 / 描述 / SVG路径 / 中心坐标", { titleSize: 16, bodySize: 11 });
-
-  slide.render();
-}
-
-// ============================================================
-// SLIDE 7: STEP 2 - MAP
-// ============================================================
-{
-  const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "Step 2: 地图实现", "MAP IMPLEMENTATION");
-
+  addHeader(slide, "01 为什么做", "先看成品：一张可以点、可以读、可以搜的地图", "4 分钟", 4);
+  drawMap(slide, 0.5, 1.48, 5.15, 3.48, false);
+  slide.addText("唐诗 / 宋词", { x: 0.72, y: 1.67, w: 1.4, h: 0.25, fontSize: 12, bold: true, color: C.primary, fontFace: FONT_BODY });
+  slide.addShape(pres.shapes.RECTANGLE, { x: 3.65, y: 1.65, w: 1.72, h: 0.34, fill: { color: C.cardLight }, line: { color: C.border, width: 0.6 } });
+  slide.addText("搜索诗名、作者或地点", { x: 3.75, y: 1.73, w: 1.52, h: 0.18, fontSize: 8.5, color: C.muted, fontFace: FONT_BODY });
   const steps = [
-    { num: "①", title: "原地图", desc: "手工绘制SVG路径\n十五道区块式边界\n简洁明了" },
-    { num: "②", title: "真实疆域", desc: "阿里云GeoJSON数据\nShapely几何清洗\nAlbers等积投影" },
-    { num: "③", title: "标签避让", desc: "碰撞检测算法\n候选位置贪心布局\n引线标注" },
-    { num: "④", title: "双地图切换", desc: "专题地图 ↔ 对照地图\n共享状态管理\n都护府虚线叠加" },
+    ["1", "选择时代", "唐诗三百首 / 宋词三百首"],
+    ["2", "点击圆点", "查看该区域热度最高的五首"],
+    ["3", "进入详情", "读全文、浅解与地理小笺"],
+    ["4", "继续探索", "搜索、筛选、分页或切换地图"],
   ];
-
-  const cardW = (CONTENT_W - 0.6) / 4;
   steps.forEach((s, i) => {
-    const x = CONTENT_X + i * (cardW + 0.2);
-    slide.addShape(pres.shapes.RECTANGLE, {
-      x, y: 1.8, w: cardW, h: 2.5,
-      fill: { color: C.bgCard }, rectRadius: 0.08,
-      line: { color: C.lightBorder, width: 0.5 },
-    });
-    slide.addText(s.num, {
-      x: x + 0.15, y: 1.95, w: 0.5, h: 0.5,
-      fontSize: 28, color: C.accent, fontFace: FONT_TITLE,
-    });
-    slide.addText(s.title, {
-      x: x + 0.15, y: 2.45, w: cardW - 0.3, h: 0.35,
-      fontSize: 16, bold: true, color: C.primary, fontFace: FONT_TITLE,
-    });
-    slide.addText(s.desc, {
-      x: x + 0.15, y: 2.85, w: cardW - 0.3, h: 1.2,
-      fontSize: 12, color: C.text, fontFace: FONT_BODY, lineSpacing: 20,
-    });
+    const y = 1.5 + i * 0.84;
+    addNumberCircle(slide, s[0], 6.02, y, 0.4, i === 3 ? C.accent : C.secondary);
+    slide.addText(s[1], { x: 6.58, y: y - 0.01, w: 2.75, h: 0.27, fontSize: 15, bold: true, color: C.primary, fontFace: FONT_TITLE });
+    slide.addText(s[2], { x: 6.58, y: y + 0.35, w: 2.75, h: 0.25, fontSize: 11.5, color: C.muted, fontFace: FONT_BODY });
   });
-
+  slide.addShape(pres.shapes.RECTANGLE, { x: 5.93, y: 4.72, w: 3.57, h: 0.34, fill: { color: C.paleRed }, line: { color: C.paleRed } });
+  slide.addText("核心不是“看地图”，而是“沿地图读诗”。", { x: 6.05, y: 4.79, w: 3.33, h: 0.2, fontSize: 11.5, bold: true, color: C.secondary, fontFace: FONT_BODY, align: "center" });
   slide.render();
 }
 
-// ============================================================
-// SLIDE 8: STEP 3 - INTERACTION
-// ============================================================
+// 5. Timeline
 {
   const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "Step 3: 核心交互", "CORE INTERACTIONS");
-
-  // Flow diagram
-  const flow = [
-    { label: "点击聚合点", x: 0.5 },
-    { label: "区域Top5面板", x: 2.3 },
-    { label: "诗词详情弹窗", x: 4.3 },
-    { label: "复制/关闭", x: 6.3 },
+  addHeader(slide, "02 怎样做出来", "开发时间线：四个开发日，持续迭代", "3 分钟", 5);
+  slide.addShape(pres.shapes.LINE, { x: 1.2, y: 2.74, w: 7.6, h: 0, line: { color: C.accent, width: 2 } });
+  const milestones = [
+    ["11 月 15 日", "初版上线", "唐诗 300 首\n盛唐十五道\n区域聚合点与前五\n全量诗库与分页"],
+    ["11 月 16 日", "扩展与移动适配", "新增宋词 300 首\n北宋二十四路\n唐宋切换\n手机手势与防跳屏"],
+    ["11 月 17 日", "体验集中完善", "专题 / 对照地图\n三击关闭与使用指南\n滚动提示\n零收录区域也可见"],
+    ["11 月 18 日", "历史边界补充", "研究都护府体系\n叠加安西、北庭\n虚线边界与标注\n同步更新线上版本"],
   ];
-
-  flow.forEach((f, i) => {
-    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-      x: CONTENT_X + f.x, y: 1.8, w: 1.5, h: 0.6,
-      fill: { color: C.primary }, rectRadius: 0.1,
-    });
-    slide.addText(f.label, {
-      x: CONTENT_X + f.x, y: 1.9, w: 1.5, h: 0.4,
-      fontSize: 12, bold: true, color: C.white, align: "center", fontFace: FONT_BODY,
-    });
-    if (i < flow.length - 1) {
-      slide.addShape(pres.shapes.RIGHT_ARROW, {
-        x: CONTENT_X + f.x + 1.55, y: 1.95, w: 0.2, h: 0.25,
-        fill: { color: C.accent },
-      });
-    }
+  milestones.forEach((m, i) => {
+    const x = 0.52 + i * 2.28;
+    slide.addText(m[0], { x, y: 1.5, w: 2.05, h: 0.28, fontSize: 13, bold: true, color: C.secondary, fontFace: FONT_BODY, align: "center" });
+    slide.addText(m[1], { x, y: 1.9, w: 2.05, h: 0.35, fontSize: 16, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center" });
+    slide.addShape(pres.shapes.OVAL, { x: x + 0.89, y: 2.56, w: 0.28, h: 0.28, fill: { color: i === 3 ? C.secondary : C.primary }, line: { color: C.bg, width: 2 } });
+    slide.addText(m[2], { x: x + 0.1, y: 3.1, w: 1.85, h: 1.28, fontSize: 12, color: C.text, fontFace: FONT_BODY, align: "center", lineSpacing: 20 });
   });
-
-  // Interaction details
-  const interactions = [
-    { title: "聚合点交互", desc: "大小随诗词数量变化\n点击展开区域面板\n键盘可访问 (Tab + Enter)" },
-    { title: "诗词详情", desc: "标题/作者/正文/解释/地理小笺\n一键复制诗文\n三击关闭 + 手机滑动关闭" },
-    { title: "全量诗库", desc: "搜索 + 区域筛选\n分页：10/20/30/50首\n移动端自适应" },
-  ];
-
-  interactions.forEach((item, i) => {
-    addCard(slide, CONTENT_X + i * 3, 2.8, 2.8, 2.2, item.title, item.desc, { titleSize: 14, bodySize: 11 });
-  });
-
+  slide.addShape(pres.shapes.RECTANGLE, { x: 1.05, y: 4.62, w: 7.9, h: 0.42, fill: { color: C.paleGold }, line: { color: C.paleGold } });
+  slide.addText("节奏不是“一次做完”，而是“先能用，再好读，再更准确”。", { x: 1.25, y: 4.71, w: 7.5, h: 0.24, fontSize: 13, bold: true, color: C.primary, fontFace: FONT_BODY, align: "center" });
   slide.render();
 }
 
-// ============================================================
-// SLIDE 9: STEP 4 - MAP EVOLUTION
-// ============================================================
+// 6. Roles
 {
   const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "Step 4: 地图演进", "MAP EVOLUTION");
-
-  // Timeline
-  const timeline = [
-    { phase: "V1", title: "区块式原地图", desc: "手工SVG路径\n十五道边界清晰\n适合教学展示", color: "4a9aaa" },
-    { phase: "V2", title: "真实疆域地图", desc: "GeoJSON数据驱动\nAlbers投影\n山河标注 + 标签避让", color: "2a7a8a" },
-    { phase: "V3", title: "双地图 + 都护府", desc: "专题地图 ↔ 对照地图\n洛阳中心视野\n安西/北庭虚线叠加", color: C.primary },
+  addHeader(slide, "02 怎样做出来", "不是 AI 独自完成，而是四方协作", "2 分钟", 6);
+  const roles = [
+    ["人", "提出方向", "决定做什么\n判断好不好\n核验历史与体验", C.paleRed],
+    ["AI", "加速实现", "生成网页与脚本\n根据反馈修改\n协助排查问题", C.paleGold],
+    ["源", "开放数据", "开源诗词文本\n公开地理数据\n历史区划研究", C.paleBlue],
+    ["网", "发布传播", "浏览器呈现\n双平台上线\n短链便捷分享", C.card],
   ];
-
-  timeline.forEach((t, i) => {
-    const x = CONTENT_X + i * 3;
-    // phase badge
-    slide.addShape(pres.shapes.OVAL, {
-      x: x + 0.8, y: 1.7, w: 0.6, h: 0.6,
-      fill: { color: t.color },
-    });
-    slide.addText(t.phase, {
-      x: x + 0.8, y: 1.78, w: 0.6, h: 0.4,
-      fontSize: 16, bold: true, color: C.white, align: "center", fontFace: FONT_TITLE,
-    });
-    // connecting line
-    if (i < timeline.length - 1) {
-      slide.addShape(pres.shapes.RECTANGLE, {
-        x: x + 1.45, y: 1.95, w: 1.3, h: 0.03,
-        fill: { color: C.accent },
-      });
-    }
-    // content
-    slide.addText(t.title, {
-      x, y: 2.5, w: 2.8, h: 0.35,
-      fontSize: 16, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center",
-    });
-    slide.addText(t.desc, {
-      x: x + 0.2, y: 2.9, w: 2.4, h: 1.5,
-      fontSize: 12, color: C.text, fontFace: FONT_BODY, align: "center", lineSpacing: 20,
-    });
+  roles.forEach((r, i) => {
+    const x = 0.5 + i * 2.28;
+    slide.addShape(pres.shapes.RECTANGLE, { x, y: 1.55, w: 2.08, h: 2.85, fill: { color: r[3] }, line: { color: C.border, width: 0.6 } });
+    slide.addShape(pres.shapes.OVAL, { x: x + 0.62, y: 1.83, w: 0.84, h: 0.84, fill: { color: i === 1 ? C.secondary : C.primary }, line: { color: i === 1 ? C.secondary : C.primary } });
+    slide.addText(r[0], { x: x + 0.62, y: 2.02, w: 0.84, h: 0.4, fontSize: 23, bold: true, color: C.white, fontFace: FONT_TITLE, align: "center" });
+    slide.addText(r[1], { x: x + 0.18, y: 2.93, w: 1.72, h: 0.35, fontSize: 17, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center" });
+    slide.addText(r[2], { x: x + 0.18, y: 3.42, w: 1.72, h: 0.76, fontSize: 12, color: C.text, fontFace: FONT_BODY, align: "center", lineSpacing: 19 });
   });
-
+  slide.addText("AI 降低实现门槛；人仍然负责问题、审美、事实与取舍。", { x: 1.0, y: 4.72, w: 8.0, h: 0.3, fontSize: 14, bold: true, color: C.secondary, fontFace: FONT_BODY, align: "center" });
   slide.render();
 }
 
-// ============================================================
-// SLIDE 10: STEP 5 - UX OPTIMIZATION
-// ============================================================
+// 7. Tools
 {
   const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "Step 5: 体验优化", "UX OPTIMIZATION");
-
-  const optimizations = [
-    { icon: "📱", title: "移动端适配", items: ["响应式布局 + 安全区", "Tab切换不滚动", "搜索框居中拉宽"] },
-    { icon: "👆", title: "手势交互", items: ["左右滑动关闭详情", "三击关闭（桌面端）", "touch-action: pan-y"] },
-    { icon: "🔍", title: "可读性", items: ["两轮字体放大", "标签碰撞避让", "引线标注系统"] },
-    { icon: "♿", title: "无障碍", items: ["键盘导航支持", "aria-label 标注", "焦点管理"] },
-  ];
-
-  const cardW = (CONTENT_W - 0.6) / 4;
-  optimizations.forEach((o, i) => {
-    const x = CONTENT_X + i * (cardW + 0.2);
-    slide.addShape(pres.shapes.RECTANGLE, {
-      x, y: 1.8, w: cardW, h: 3,
-      fill: { color: C.bgCard }, rectRadius: 0.08,
-      line: { color: C.lightBorder, width: 0.5 },
-    });
-    slide.addText(o.icon, {
-      x: x + 0.15, y: 1.95, w: 0.5, h: 0.5, fontSize: 28,
-    });
-    slide.addText(o.title, {
-      x: x + 0.15, y: 2.5, w: cardW - 0.3, h: 0.35,
-      fontSize: 15, bold: true, color: C.primary, fontFace: FONT_TITLE,
-    });
-    addBulletList(slide, o.items, x + 0.15, 2.95, cardW - 0.3, { fontSize: 11, lineSpacing: 22 });
+  addHeader(slide, "02 怎样做出来", "用了哪些工具？把它们翻译成大白话", "3 分钟", 7);
+  const cols = [0.5, 2.9, 6.2];
+  const widths = [2.4, 3.3, 3.3];
+  slide.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: 1.45, w: 9, h: 0.42, fill: { color: C.primary }, line: { color: C.primary } });
+  ["工具", "白话解释", "在项目里做什么"].forEach((t, i) => {
+    slide.addText(t, { x: cols[i] + 0.15, y: 1.55, w: widths[i] - 0.3, h: 0.23, fontSize: 12.5, bold: true, color: C.white, fontFace: FONT_BODY });
   });
-
+  const rows = [
+    ["Trae AI", "对话式开发伙伴", "生成页面、修改功能、协助排错"],
+    ["React + TypeScript", "网页积木 + 拼写检查", "组织页面结构，提前发现差错"],
+    ["SVG", "可无限放大的数字地图", "绘制区域、圆点、边界与地名"],
+    ["Python + Shapely + PyProj", "地理数据整理与坐标换算", "清洗疆域数据，生成可用地图"],
+    ["Vercel + Traesite + TinyURL", "发布网站与分享入口", "海外及国内访问、统一短链"],
+  ];
+  rows.forEach((r, i) => {
+    const y = 1.93 + i * 0.59;
+    const fill = i % 2 === 0 ? C.cardLight : C.card;
+    slide.addShape(pres.shapes.RECTANGLE, { x: 0.5, y, w: 9, h: 0.53, fill: { color: fill }, line: { color: C.border, width: 0.4 } });
+    r.forEach((t, j) => {
+      slide.addText(t, { x: cols[j] + 0.15, y: y + 0.13, w: widths[j] - 0.3, h: 0.29, fontSize: j === 0 ? (i === 4 ? 10 : 11.5) : 12, bold: j === 0, color: j === 0 ? C.primary : C.text, fontFace: FONT_BODY });
+    });
+  });
+  slide.addText("另有 Git 记录每次修改，像“修订历史”一样便于追踪与回溯。", { x: 0.72, y: 4.91, w: 8.55, h: 0.24, fontSize: 11.5, color: C.muted, fontFace: FONT_BODY });
   slide.render();
 }
 
-// ============================================================
-// SLIDE 11: DEPLOYMENT
-// ============================================================
+// 8. Data
 {
   const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "部署与上线", "DEPLOYMENT");
-
-  // Vercel
-  addCard(slide, CONTENT_X, 1.7, 4.2, 1.8, "Vercel (生产环境)", "• 静态站点托管 (dist/)\n• 自动构建 + CDN加速\n• 生产地址: cultural-on-map.vercel.app\n• 多次部署迭代", { titleSize: 16, bodySize: 12 });
-
-  // Traesite
-  addCard(slide, CONTENT_X + 4.6, 1.7, 4.2, 1.8, "Traesite (国内镜像)", "• 同步部署静态产物\n• 国内访问优化\n• 公开访问权限\n• 部署ID追踪", { titleSize: 16, bodySize: 12 });
-
-  // Short link
-  slide.addShape(pres.shapes.RECTANGLE, {
-    x: CONTENT_X, y: 3.8, w: CONTENT_W, h: 0.8,
-    fill: { color: C.primary }, rectRadius: 0.08,
-  });
-  slide.addText("🔗 短链入口", {
-    x: CONTENT_X + 0.3, y: 3.9, w: 2, h: 0.3,
-    fontSize: 14, bold: true, color: C.accent, fontFace: FONT_BODY,
-  });
-  slide.addText("tinyurl.com/cultural-on-map  →  自动跳转至 Traesite", {
-    x: CONTENT_X + 0.3, y: 4.2, w: CONTENT_W - 0.6, h: 0.3,
-    fontSize: 14, color: C.white, fontFace: FONT_BODY,
-  });
-
-  slide.render();
-}
-
-// ============================================================
-// SLIDE 12: DEV TOOLS
-// ============================================================
-{
-  const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "开发工具：Trae AI", "AI-ASSISTED DEVELOPMENT");
-
-  // Center description
-  slide.addText("整个项目通过 Trae AI 辅助开发完成，用自然语言描述需求，AI 生成代码并迭代优化", {
-    x: CONTENT_X, y: 1.6, w: CONTENT_W, h: 0.5,
-    fontSize: 16, color: C.text, fontFace: FONT_BODY, align: "center",
-  });
-
-  const tools = [
-    { icon: "💬", title: "自然语言驱动", desc: "\"帮我做一个地图上的唐诗\"\n→ 自动生成完整项目" },
-    { icon: "🔄", title: "迭代式开发", desc: "\"字体放大一点\"\n\"新增宋词300首\"\n→ 精准修改，不破坏已有功能" },
-    { icon: "🗺️", title: "数据生成", desc: "Python脚本生成地图几何\nShapely清洗 + Albers投影\n→ 自动化数据处理" },
-    { icon: "🚀", title: "一键部署", desc: "\"部署到Vercel和Traesite\"\n→ 自动构建 + 上传 + 上线" },
-  ];
-
-  const cardW = (CONTENT_W - 0.6) / 4;
-  tools.forEach((t, i) => {
-    const x = CONTENT_X + i * (cardW + 0.2);
-    slide.addShape(pres.shapes.RECTANGLE, {
-      x, y: 2.3, w: cardW, h: 2.5,
-      fill: { color: C.bgCard }, rectRadius: 0.08,
-      line: { color: C.lightBorder, width: 0.5 },
-    });
-    slide.addText(t.icon, { x: x + 0.15, y: 2.45, w: 0.5, h: 0.5, fontSize: 28 });
-    slide.addText(t.title, {
-      x: x + 0.15, y: 3, w: cardW - 0.3, h: 0.35,
-      fontSize: 14, bold: true, color: C.primary, fontFace: FONT_TITLE,
-    });
-    slide.addText(t.desc, {
-      x: x + 0.15, y: 3.4, w: cardW - 0.3, h: 1.2,
-      fontSize: 11, color: C.text, fontFace: FONT_BODY, lineSpacing: 18,
-    });
-  });
-
-  slide.render();
-}
-
-// ============================================================
-// SLIDE 13: CHALLENGES
-// ============================================================
-{
-  const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "挑战与解决", "CHALLENGES & SOLUTIONS");
-
-  const challenges = [
-    { problem: "标签重叠", solution: "碰撞检测 + 贪心布局\n候选位置算法 + 引线标注", icon: "🏷️" },
-    { problem: "真实疆域", solution: "GeoJSON → Shapely清洗\nAlbers等积投影转换", icon: "🗺️" },
-    { problem: "移动端回退", solution: "touch-action: pan-y\npreventDefault 拦截\n手势识别阈值控制", icon: "📱" },
-    { problem: "宋地图ID不一致", solution: "jingnanbei ↔ jingxibei\n几何映射别名兼容", icon: "🔗" },
-  ];
-
-  challenges.forEach((c, i) => {
-    const y = 1.7 + i * 1;
-    // icon
-    slide.addText(c.icon, { x: CONTENT_X, y: y + 0.05, w: 0.5, h: 0.5, fontSize: 24 });
-    // problem
-    slide.addText(c.problem, {
-      x: CONTENT_X + 0.6, y, w: 2.5, h: 0.35,
-      fontSize: 16, bold: true, color: C.secondary, fontFace: FONT_TITLE,
-    });
-    // arrow
-    slide.addText("→", {
-      x: CONTENT_X + 3.2, y, w: 0.4, h: 0.35,
-      fontSize: 18, color: C.accent, align: "center",
-    });
-    // solution
-    slide.addText(c.solution, {
-      x: CONTENT_X + 3.8, y, w: 5, h: 0.8,
-      fontSize: 12, color: C.text, fontFace: FONT_BODY, lineSpacing: 20,
-    });
-  });
-
-  slide.render();
-}
-
-// ============================================================
-// SLIDE 14: RESULTS
-// ============================================================
-{
-  const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "成果展示", "RESULTS");
-
-  // Stats
-  const stats = [
-    { num: "600", label: "首诗词", sub: "唐诗300 + 宋词300" },
-    { num: "39", label: "个行政区", sub: "唐15道 + 宋24路" },
-    { num: "2", label: "种地图", sub: "专题地图 + 对照地图" },
-    { num: "2", label: "个平台", sub: "Vercel + Traesite" },
-  ];
-
+  addHeader(slide, "02 关键步骤 · 一", "先把诗词整理好：内容准确，才有后面的地图", "3 分钟", 8);
+  const stats = [["600", "首唐宋诗词"], ["39", "个历史区域"], ["6", "类核心信息"]];
   stats.forEach((s, i) => {
-    const x = CONTENT_X + i * 2.2;
-    slide.addText(s.num, {
-      x, y: 1.8, w: 2, h: 0.8,
-      fontSize: 48, bold: true, color: C.accent, fontFace: FONT_TITLE, align: "center",
-    });
-    slide.addText(s.label, {
-      x, y: 2.6, w: 2, h: 0.35,
-      fontSize: 18, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center",
-    });
-    slide.addText(s.sub, {
-      x, y: 2.95, w: 2, h: 0.3,
-      fontSize: 12, color: C.textLight, fontFace: FONT_BODY, align: "center",
-    });
+    const x = 0.5 + i * 1.8;
+    slide.addText(s[0], { x, y: 1.5, w: 1.55, h: 0.65, fontSize: 35, bold: true, color: i === 0 ? C.secondary : C.primary, fontFace: FONT_TITLE, align: "center" });
+    slide.addText(s[1], { x, y: 2.18, w: 1.55, h: 0.28, fontSize: 12.5, color: C.muted, fontFace: FONT_BODY, align: "center" });
   });
-
-  // Features
-  slide.addShape(pres.shapes.RECTANGLE, {
-    x: CONTENT_X, y: 3.6, w: CONTENT_W, h: 1.4,
-    fill: { color: C.bgCard }, rectRadius: 0.08,
+  addCard(slide, 6.05, 1.48, 3.45, 1.22, "每首作品包含什么？", "标题、作者、正文、浅解\n地理位置、区域归属", { fill: C.paleGold, bodySize: 12.5, lineSpacing: 20 });
+  const flow = [["收集文本", "开源诗词库"], ["补充解释", "浅解与地理小笺"], ["建立关联", "唐诗归十五道\n宋词归二十四路"]];
+  flow.forEach((f, i) => {
+    const x = 0.5 + i * 3.05;
+    slide.addShape(pres.shapes.RECTANGLE, { x, y: 3.0, w: 2.65, h: 1.0, fill: { color: i === 1 ? C.paleRed : C.cardLight }, line: { color: C.border, width: 0.7 } });
+    slide.addText(f[0], { x: x + 0.15, y: 3.16, w: 2.35, h: 0.28, fontSize: 16, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center" });
+    slide.addText(f[1], { x: x + 0.15, y: 3.55, w: 2.35, h: 0.3, fontSize: 11.5, color: C.muted, fontFace: FONT_BODY, align: "center" });
+    if (i < 2) addArrow(slide, x + 2.72, 3.37, 0.26);
   });
-  slide.addText("核心功能", {
-    x: CONTENT_X + 0.2, y: 3.7, w: 2, h: 0.3,
-    fontSize: 14, bold: true, color: C.primary, fontFace: FONT_TITLE,
-  });
-  const features = "✅ 地图聚合点 + 区域Top5    ✅ 诗词详情 + 一键复制    ✅ 全量诗库 + 搜索筛选\n✅ 双地图切换 + 都护府叠加    ✅ 移动端手势 + 三击关闭    ✅ 使用指南 + 更新日志";
-  slide.addText(features, {
-    x: CONTENT_X + 0.2, y: 4.05, w: CONTENT_W - 0.4, h: 0.8,
-    fontSize: 12, color: C.text, fontFace: FONT_BODY, lineSpacing: 24,
-  });
-
+  slide.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: 4.4, w: 9, h: 0.55, fill: { color: C.primary }, line: { color: C.primary } });
+  slide.addText("数据原则：开源文本没有可靠创作年份，就不凭空猜测、不强行补齐。", { x: 0.78, y: 4.55, w: 8.45, h: 0.26, fontSize: 13, bold: true, color: C.white, fontFace: FONT_BODY, align: "center" });
   slide.render();
 }
 
-// ============================================================
-// SLIDE 15: SUMMARY
-// ============================================================
+// 9. Map construction
 {
   const slide = pres.addSlide();
-  slide.background = { color: C.bg };
-  addSlideTitle(slide, "总结与展望", "SUMMARY & OUTLOOK");
-
-  // Left: what we learned
-  addCard(slide, CONTENT_X, 1.7, 4.2, 2.8, "经验沉淀", "• AI辅助开发效率极高，从需求到上线\n• 数据质量决定产品体验上限\n• 地图可视化需要算法支撑（标签避让）\n• 移动端手势需要精细的事件处理\n• 双平台部署保障访问稳定性", { titleSize: 16, bodySize: 12 });
-
-  // Right: future
-  addCard(slide, CONTENT_X + 4.6, 1.7, 4.2, 2.8, "未来方向", "• 持续校订诗词与地理数据\n• 诗人行旅路线图\n• 诗词朗诵音频\n• 用户收藏与分享\n• 更多朝代（元曲/明清诗）", { titleSize: 16, bodySize: 12 });
-
+  addHeader(slide, "02 关键步骤 · 二", "再把历史画成地图：先研究，再绘制", "4 分钟", 9);
+  const steps = [
+    ["1", "查史料", "明确唐代十五道\n北宋二十四路"],
+    ["2", "定区域", "记录治所、今属地\n与历史说明"],
+    ["3", "画边界", "用 SVG 描绘\n可缩放的区域"],
+    ["4", "放地名", "自动避让重叠\n必要时加引线"],
+    ["5", "连诗词", "让每个区域\n连接对应作品"],
+  ];
+  steps.forEach((s, i) => {
+    const x = 0.5 + i * 1.82;
+    addNumberCircle(slide, s[0], x + 0.57, 1.52, 0.5, i === 4 ? C.secondary : C.primary);
+    slide.addText(s[1], { x, y: 2.2, w: 1.64, h: 0.35, fontSize: 16, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center" });
+    slide.addText(s[2], { x, y: 2.72, w: 1.64, h: 0.68, fontSize: 11.5, color: C.text, fontFace: FONT_BODY, align: "center", lineSpacing: 19 });
+    if (i < 4) addArrow(slide, x + 1.58, 1.67, 0.25);
+  });
+  slide.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: 3.73, w: 4.3, h: 1.08, fill: { color: C.paleBlue }, line: { color: C.border, width: 0.6 } });
+  slide.addText("为什么要研究都护府？", { x: 0.72, y: 3.91, w: 3.85, h: 0.3, fontSize: 15, bold: true, color: C.primary, fontFace: FONT_TITLE });
+  slide.addText("十五道之外还有都护府等体系；轮台、安西等地名与边塞诗密切相关。", { x: 0.72, y: 4.32, w: 3.85, h: 0.34, fontSize: 11.5, color: C.text, fontFace: FONT_BODY });
+  slide.addShape(pres.shapes.RECTANGLE, { x: 5.05, y: 3.73, w: 4.45, h: 1.08, fill: { color: C.paleRed }, line: { color: C.border, width: 0.6 } });
+  slide.addText("地图不是装饰，而是知识的索引", { x: 5.28, y: 3.96, w: 4.0, h: 0.34, fontSize: 17, bold: true, color: C.secondary, fontFace: FONT_TITLE, align: "center" });
+  slide.addText("区域、地名与诗词彼此连接，才能支持探索。", { x: 5.28, y: 4.4, w: 4.0, h: 0.25, fontSize: 11.5, color: C.text, fontFace: FONT_BODY, align: "center" });
   slide.render();
 }
 
-// ============================================================
-// SLIDE 16: Q&A
-// ============================================================
+// 10. Interaction
+{
+  const slide = pres.addSlide();
+  addHeader(slide, "02 关键步骤 · 三", "让地图真正好用：从圆点到一首完整的诗", "3 分钟", 10);
+  const flow = [
+    ["圆点", "大小表示\n收录数量"],
+    ["区域前五", "先看最有代表性\n或热度高的作品"],
+    ["诗词详情", "全文、浅解\n地理小笺"],
+    ["继续发现", "搜索、筛选\n分页与复制"],
+  ];
+  flow.forEach((f, i) => {
+    const x = 0.5 + i * 2.28;
+    slide.addShape(pres.shapes.RECTANGLE, { x, y: 1.55, w: 2.0, h: 2.05, fill: { color: i === 2 ? C.paleRed : C.cardLight }, line: { color: C.border, width: 0.7 } });
+    if (i === 0) {
+      slide.addShape(pres.shapes.OVAL, { x: x + 0.65, y: 1.86, w: 0.7, h: 0.7, fill: { color: C.secondary }, line: { color: C.secondary } });
+      slide.addText("32", { x: x + 0.65, y: 2.04, w: 0.7, h: 0.3, fontSize: 17, bold: true, color: C.white, fontFace: FONT_BODY, align: "center" });
+    } else addNumberCircle(slide, String(i + 1), x + 0.75, 1.91, 0.5, i === 2 ? C.secondary : C.primary);
+    slide.addText(f[0], { x: x + 0.15, y: 2.77, w: 1.7, h: 0.32, fontSize: 16, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center" });
+    slide.addText(f[1], { x: x + 0.15, y: 3.1, w: 1.7, h: 0.45, fontSize: 11.5, color: C.muted, fontFace: FONT_BODY, align: "center", lineSpacing: 16 });
+    if (i < 3) addArrow(slide, x + 2.03, 2.35, 0.22);
+  });
+  addCard(slide, 0.5, 3.95, 4.3, 0.9, "为“0 首”也保留位置", "河东路暂无收录，也显示名称、0 和一个小点。", { titleSize: 14, bodySize: 11.5, lineSpacing: 17, fill: C.paleGold });
+  addCard(slide, 5.05, 3.95, 4.45, 0.9, "让不同人都能操作", "支持键盘导航，并兼顾电脑点击与手机手势。", { titleSize: 14, bodySize: 11.5, lineSpacing: 17, fill: C.paleBlue });
+  slide.render();
+}
+
+// 11. Two maps
+{
+  const slide = pres.addSlide();
+  addHeader(slide, "02 关键步骤 · 四", "为什么保留两种地图？因为用途不同", "3 分钟", 11);
+  addPill(slide, "专题地图 · 看清楚分区", 1.35, 1.45, 2.55, { fill: C.primary, color: C.white });
+  addPill(slide, "对照地图 · 对照真实轮廓", 6.02, 1.45, 2.72, { fill: C.secondary, color: C.white });
+  drawMap(slide, 0.5, 1.98, 4.25, 2.0, false);
+  drawMap(slide, 5.25, 1.98, 4.25, 2.0, true);
+  slide.addText("区块清楚、关系直观\n适合课堂讲解与快速查找", { x: 0.85, y: 4.15, w: 3.55, h: 0.58, fontSize: 13, color: C.text, fontFace: FONT_BODY, align: "center", lineSpacing: 21 });
+  slide.addText("疆域更接近历史地理\n适合对照山河位置与都护府", { x: 5.6, y: 4.15, w: 3.55, h: 0.58, fontSize: 13, color: C.text, fontFace: FONT_BODY, align: "center", lineSpacing: 21 });
+  slide.addText("不是新地图替代旧地图，而是让不同阅读需求都有入口。", { x: 1.0, y: 4.88, w: 8.0, h: 0.25, fontSize: 13, bold: true, color: C.secondary, fontFace: FONT_BODY, align: "center" });
+  slide.render();
+}
+
+// 12. Mobile
+{
+  const slide = pres.addSlide();
+  addHeader(slide, "02 关键步骤 · 五", "最后照顾每一个使用细节，尤其是手机", "3 分钟", 12);
+  const cards = [
+    ["看得清", "两轮放大字体\n搜索结果适配小屏\n按钮保留足够空间", "字", C.paleRed],
+    ["划得顺", "左右滑动关闭详情\n避免误回退整个页面\n切换诗集不再跳屏", "划", C.paleGold],
+    ["找得到", "地图放大后有滚动提示\n三击关闭配有文字说明\n帮助页采用同样逻辑", "找", C.paleBlue],
+  ];
+  cards.forEach((c, i) => {
+    const x = 0.5 + i * 3.05;
+    slide.addShape(pres.shapes.RECTANGLE, { x, y: 1.5, w: 2.75, h: 3.35, fill: { color: c[3] }, line: { color: C.border, width: 0.7 } });
+    slide.addShape(pres.shapes.RECTANGLE, { x: x + 0.82, y: 1.78, w: 1.12, h: 1.45, fill: { color: C.cardLight }, line: { color: C.primary, width: 1.5 } });
+    slide.addShape(pres.shapes.OVAL, { x: x + 1.25, y: 2.08, w: 0.26, h: 0.26, fill: { color: C.secondary }, line: { color: C.secondary } });
+    slide.addText(c[2], { x: x + 0.96, y: 2.48, w: 0.84, h: 0.38, fontSize: 20, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center" });
+    slide.addText(c[0], { x: x + 0.2, y: 3.47, w: 2.35, h: 0.36, fontSize: 18, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center" });
+    slide.addText(c[1], { x: x + 0.22, y: 3.97, w: 2.31, h: 0.68, fontSize: 11.5, color: C.text, fontFace: FONT_BODY, align: "center", lineSpacing: 19 });
+  });
+  slide.render();
+}
+
+// 13. Publish
+{
+  const slide = pres.addSlide();
+  addHeader(slide, "03 如何上线与迭代", "从电脑里的项目，到任何人都能打开的网页", "2 分钟", 13);
+  const steps = [["本地完成", "页面与数据"], ["构建网页", "生成发布文件"], ["双平台发布", "Vercel + Traesite"], ["短链分享", "统一、易记入口"]];
+  steps.forEach((s, i) => {
+    const x = 0.5 + i * 2.28;
+    slide.addShape(pres.shapes.RECTANGLE, { x, y: 1.55, w: 2.0, h: 1.35, fill: { color: i === 2 ? C.paleRed : C.cardLight }, line: { color: C.border, width: 0.7 } });
+    addNumberCircle(slide, String(i + 1), x + 0.16, 1.75, 0.38, i === 3 ? C.secondary : C.primary);
+    slide.addText(s[0], { x: x + 0.18, y: 2.2, w: 1.64, h: 0.3, fontSize: 15, bold: true, color: C.primary, fontFace: FONT_TITLE, align: "center" });
+    slide.addText(s[1], { x: x + 0.18, y: 2.56, w: 1.64, h: 0.22, fontSize: 10.5, color: C.muted, fontFace: FONT_BODY, align: "center" });
+    if (i < 3) addArrow(slide, x + 2.03, 2.05, 0.22);
+  });
+  addCard(slide, 0.5, 3.25, 4.3, 1.42, "两个访问平台", "Vercel：cultural-on-map.vercel.app\nTraesite：国内访问入口\n每次功能更新后重新构建并同步发布", { bodySize: 11.5, lineSpacing: 19, fill: C.paleBlue });
+  slide.addShape(pres.shapes.RECTANGLE, { x: 5.05, y: 3.25, w: 4.45, h: 1.42, fill: { color: C.primary }, line: { color: C.primary } });
+  slide.addText("一个容易分享的地址", { x: 5.35, y: 3.49, w: 3.85, h: 0.3, fontSize: 15, bold: true, color: C.accent, fontFace: FONT_TITLE, align: "center" });
+  slide.addText("tinyurl.com/cultural-on-map", { x: 5.3, y: 4.03, w: 3.95, h: 0.3, fontSize: 15, bold: true, color: C.white, fontFace: FONT_BODY, align: "center" });
+  slide.render();
+}
+
+// 14. Challenges
+{
+  const slide = pres.addSlide();
+  addHeader(slide, "03 如何上线与迭代", "四个真实难题：答案都来自试用、反馈与修正", "3 分钟", 14);
+  const challenges = [
+    ["地名挤在一起", "像安排座位一样自动避让，仍放不下就加引线。", "标签重叠 → 自动布局"],
+    ["古今地图难兼顾", "同时保留专题与对照地图，不用一种视图包打天下。", "历史口径 → 双地图"],
+    ["手机滑动会误回退", "识别滑动方向，把关闭动作限制在诗词详情页。", "手势冲突 → 精细处理"],
+    ["原始数据缺少年份", "查证开源数据后不猜测、不编造，停止无可靠来源的补充。", "信息缺失 → 守住事实"],
+  ];
+  challenges.forEach((c, i) => {
+    const x = 0.5 + (i % 2) * 4.6;
+    const y = 1.48 + Math.floor(i / 2) * 1.7;
+    slide.addShape(pres.shapes.RECTANGLE, { x, y, w: 4.4, h: 1.45, fill: { color: i === 3 ? C.paleRed : C.cardLight }, line: { color: C.border, width: 0.7 } });
+    slide.addText(c[2], { x: x + 0.2, y: y + 0.16, w: 3.95, h: 0.23, fontSize: 10.5, bold: true, color: C.secondary, fontFace: FONT_BODY });
+    slide.addText(c[0], { x: x + 0.2, y: y + 0.5, w: 3.95, h: 0.32, fontSize: 16, bold: true, color: C.primary, fontFace: FONT_TITLE });
+    slide.addText(c[1], { x: x + 0.2, y: y + 0.94, w: 3.95, h: 0.34, fontSize: 11.5, color: C.text, fontFace: FONT_BODY });
+  });
+  slide.addText("关键经验：AI 可以加速修改，但“什么是对的”仍需要人来判断。", { x: 0.85, y: 4.93, w: 8.3, h: 0.25, fontSize: 13, bold: true, color: C.secondary, fontFace: FONT_BODY, align: "center" });
+  slide.render();
+}
+
+// 15. Value
+{
+  const slide = pres.addSlide();
+  addHeader(slide, "04 价值与讨论", "这个项目带来的，不只是一个网页", "2 分钟", 15);
+  const lessons = [
+    ["从想法到原型", "AI 降低了实现门槛，非工程专业也能参与数字产品创造。"],
+    ["从文本到空间", "诗词、历史与地理结合后，知识变得可定位、可比较、可探索。"],
+    ["从完成到好用", "真正决定体验的，是一次次试用、反馈和对细节的坚持。"],
+  ];
+  lessons.forEach((l, i) => {
+    const y = 1.48 + i * 1.06;
+    addNumberCircle(slide, String(i + 1), 0.55, y + 0.08, 0.42, i === 1 ? C.accent : C.secondary);
+    slide.addText(l[0], { x: 1.15, y, w: 3.85, h: 0.32, fontSize: 16, bold: true, color: C.primary, fontFace: FONT_TITLE });
+    slide.addText(l[1], { x: 1.15, y: y + 0.42, w: 3.85, h: 0.43, fontSize: 11.5, color: C.text, fontFace: FONT_BODY });
+  });
+  slide.addShape(pres.shapes.RECTANGLE, { x: 5.35, y: 1.48, w: 4.15, h: 3.2, fill: { color: C.primary }, line: { color: C.primary } });
+  slide.addText("它可以用在哪里？", { x: 5.65, y: 1.75, w: 3.55, h: 0.36, fontSize: 18, bold: true, color: C.accent, fontFace: FONT_TITLE, align: "center" });
+  const scenes = [["课堂教学", "把诗放进地图讲"], ["文化展陈", "让观众自主探索"], ["旅行阅读", "带着诗词看山河"], ["亲子共学", "从地点激发好奇"]];
+  scenes.forEach((s, i) => {
+    const x = 5.65 + (i % 2) * 1.8;
+    const y = 2.4 + Math.floor(i / 2) * 0.95;
+    slide.addShape(pres.shapes.RECTANGLE, { x, y, w: 1.62, h: 0.76, fill: { color: C.primary2 }, line: { color: "567681", width: 0.6 } });
+    slide.addText(s[0], { x: x + 0.1, y: y + 0.12, w: 1.42, h: 0.23, fontSize: 12.5, bold: true, color: C.white, fontFace: FONT_BODY, align: "center" });
+    slide.addText(s[1], { x: x + 0.1, y: y + 0.43, w: 1.42, h: 0.19, fontSize: 9.5, color: "D7E3E2", fontFace: FONT_BODY, align: "center" });
+  });
+  slide.addText("技术把入口做轻，文化把内容做深。", { x: 0.65, y: 4.9, w: 8.7, h: 0.28, fontSize: 15, bold: true, color: C.secondary, fontFace: FONT_TITLE, align: "center" });
+  slide.render();
+}
+
+// 16. Q&A
 {
   const slide = pres.addSlide();
   slide.background = { color: C.primary };
-
-  slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: SLIDE_W, h: 0.06, fill: { color: C.accent } });
-  slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: SLIDE_H - 0.06, w: SLIDE_W, h: 0.06, fill: { color: C.accent } });
-
-  slide.addText("谢谢", {
-    x: 0, y: 1.5, w: SLIDE_W, h: 1,
-    fontSize: 48, bold: true, color: C.white, fontFace: FONT_TITLE,
-    align: "center", charSpacing: 6,
+  slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: SLIDE_W, h: 0.08, fill: { color: C.accent }, line: { color: C.accent } });
+  slide.addText("谢谢聆听", { x: 0.65, y: 0.72, w: 4.4, h: 0.7, fontSize: 36, bold: true, color: C.white, fontFace: FONT_TITLE, charSpacing: 2 });
+  slide.addText("提问与讨论 · 20 分钟", { x: 0.68, y: 1.58, w: 4.2, h: 0.35, fontSize: 18, color: C.accent, fontFace: FONT_BODY });
+  const prompts = [
+    "如果用于课堂或展览，你最想增加什么？",
+    "你更想沿着诗人的足迹，还是沿着城市读诗？",
+    "AI 参与文化产品，应守住哪些事实与表达边界？",
+  ];
+  prompts.forEach((p, i) => {
+    addNumberCircle(slide, String(i + 1), 0.72, 2.32 + i * 0.7, 0.36, C.secondary);
+    slide.addText(p, { x: 1.25, y: 2.34 + i * 0.7, w: 6.9, h: 0.32, fontSize: 14, color: "E4ECEA", fontFace: FONT_BODY });
   });
-
-  slide.addText("Q & A · 讨论环节（20分钟）", {
-    x: 0, y: 2.6, w: SLIDE_W, h: 0.5,
-    fontSize: 20, color: C.accent, fontFace: FONT_BODY, align: "center",
-  });
-
-  slide.addText("诗词山河 · 让每一首诗回到它诞生的山河之间", {
-    x: 0, y: 3.5, w: SLIDE_W, h: 0.4,
-    fontSize: 14, color: "a0b4c0", fontFace: FONT_BODY, align: "center",
-  });
-
-  slide.addText("tinyurl.com/cultural-on-map", {
-    x: 0, y: 4.2, w: SLIDE_W, h: 0.3,
-    fontSize: 12, color: "8098a8", fontFace: FONT_BODY, align: "center",
-  });
-
+  slide.addShape(pres.shapes.RECTANGLE, { x: 6.55, y: 0.78, w: 2.75, h: 1.1, fill: { color: C.primary2 }, line: { color: "567681", width: 0.7 } });
+  slide.addText("便于记忆的短链入口", { x: 6.77, y: 0.98, w: 2.3, h: 0.23, fontSize: 11, color: "C7D7D6", fontFace: FONT_BODY, align: "center" });
+  slide.addText("tinyurl.com/\ncultural-on-map", { x: 6.77, y: 1.3, w: 2.3, h: 0.42, fontSize: 13, bold: true, color: C.white, fontFace: FONT_BODY, align: "center", lineSpacing: 18 });
+  slide.addText("诗词山河 · 让每一首诗回到它诞生的山河之间", { x: 0.68, y: 4.85, w: 8.65, h: 0.28, fontSize: 13, color: "AFC4C5", fontFace: FONT_TITLE });
   slide.render();
 }
 
-// ============================================================
-// WRITE FILE
-// ============================================================
-const outputPath = "/workspace/ppt-share/诗词山河-开发分享.pptx";
+const outputPath = "/workspace/ppt-share/诗词山河-科普分享.pptx";
 pres.writeFile({ fileName: outputPath }).then(() => {
   console.log("PPT saved to:", outputPath);
 }).catch(err => {
   console.error("Error:", err);
+  process.exitCode = 1;
 });
