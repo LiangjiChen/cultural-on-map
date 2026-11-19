@@ -402,7 +402,7 @@ function drawMap(slide, x, y, w, h, realistic = false) {
 {
   const slide = pres.addSlide();
   addHeader(slide, "03 如何上线与迭代", "从电脑里的项目，到任何人都能打开的网页", "2 分钟", 13);
-  const steps = [["本地完成", "页面与数据"], ["构建网页", "生成发布文件"], ["双平台发布", "Vercel + Traesite"], ["短链分享", "统一、易记入口"]];
+  const steps = [["本地完成", "页面与数据"], ["构建网页", "生成发布文件"], ["Traesite 发布", "traesite.cn"], ["在线分享", "统一访问入口"]];
   steps.forEach((s, i) => {
     const x = 0.5 + i * 2.28;
     slide.addShape(pres.shapes.RECTANGLE, { x, y: 1.55, w: 2.0, h: 1.35, fill: { color: i === 2 ? C.paleRed : C.cardLight }, line: { color: C.border, width: 0.7 } });
@@ -411,10 +411,10 @@ function drawMap(slide, x, y, w, h, realistic = false) {
     slide.addText(s[1], { x: x + 0.18, y: 2.56, w: 1.64, h: 0.22, fontSize: 10.5, color: C.muted, fontFace: FONT_BODY, align: "center" });
     if (i < 3) addArrow(slide, x + 2.03, 2.05, 0.22);
   });
-  addCard(slide, 0.5, 3.25, 4.3, 1.42, "两个访问平台", "Vercel：cultural-on-map.vercel.app\nTraesite：国内访问入口\n每次功能更新后重新构建并同步发布", { bodySize: 11.5, lineSpacing: 19, fill: C.paleBlue });
+  addCard(slide, 0.5, 3.25, 4.3, 1.42, "访问平台", "Traesite：37k39efxx9ty2kvgaxg.traesite.cn\n每次功能更新后重新构建并同步发布", { bodySize: 11, lineSpacing: 19, fill: C.paleBlue });
   slide.addShape(pres.shapes.RECTANGLE, { x: 5.05, y: 3.25, w: 4.45, h: 1.42, fill: { color: C.primary }, line: { color: C.primary } });
-  slide.addText("一个容易分享的地址", { x: 5.35, y: 3.49, w: 3.85, h: 0.3, fontSize: 15, bold: true, color: C.accent, fontFace: FONT_TITLE, align: "center" });
-  slide.addText("tinyurl.com/cultural-on-map", { x: 5.3, y: 4.03, w: 3.95, h: 0.3, fontSize: 15, bold: true, color: C.white, fontFace: FONT_BODY, align: "center" });
+  slide.addText("Traesite 访问地址", { x: 5.35, y: 3.49, w: 3.85, h: 0.3, fontSize: 15, bold: true, color: C.accent, fontFace: FONT_TITLE, align: "center" });
+  slide.addText("37k39efxx9ty2kvgaxg.traesite.cn", { x: 5.3, y: 4.03, w: 3.95, h: 0.3, fontSize: 13, bold: true, color: C.white, fontFace: FONT_BODY, align: "center" });
   slide.render();
 }
 
